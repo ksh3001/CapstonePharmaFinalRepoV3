@@ -21,3 +21,6 @@ Authoritative tree: master build plan §2. This file orients a newcomer; the gen
 | `evals/` | Datasets and graders (later phases). |
 | `compliance/` | Control map and tripwires. |
 | `docs/adr/` | Architecture decision records ADR-001…011. |
+| `.github/workflows/` | Optional CI/CD wrapper. Assessment CI installs nothing; Azure deploy uses `requirements.txt`. |
+| `app.py` | Azure App Service ASGI entry (`uvicorn app:app`). |
+| `infra/environments/dev/` | Bicep + provision script for a Linux Python 3.12 Web App. |

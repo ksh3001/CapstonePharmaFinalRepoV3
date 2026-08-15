@@ -30,6 +30,10 @@ Interpreter pin: CPython ≥ 3.11 and < 3.14.
 
 Live console: `python -m aegis serve` then open `http://127.0.0.1:8000/`. Optional UI extras: `pip install -r requirements-ui.txt` (FastAPI + Jinja). Not required to grade.
 
+## CI and Azure Web App
+
+`python scripts/ci.py` is the platform-neutral pipeline (setup, gates, tests, evaluate). GitHub Actions (`.github/workflows/ci.yml`) runs it on 3.11 and 3.12. Pushes to `main` then deploy the FastAPI console to Azure App Service (`.github/workflows/deploy-azure.yml`). Provisioning and secrets: `docs/operations/azure-webapp.md`.
+
 ## What this repository is not
 
 - Not a batch-disposition, PV-decision, eligibility, allocation, or recall system.

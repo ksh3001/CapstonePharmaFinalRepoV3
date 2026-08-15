@@ -28,6 +28,14 @@ def challenge_root() -> Path:
     )
 
 
+def challenge_available() -> bool:
+    try:
+        challenge_root()
+    except FileNotFoundError:
+        return False
+    return True
+
+
 def data_dir() -> Path:
     return repo_root() / "data"
 

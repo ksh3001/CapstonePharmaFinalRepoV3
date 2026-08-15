@@ -5,10 +5,11 @@ from pathlib import Path
 
 from packages.domain.evidence import build_evidence_item
 from packages.domain.types import Abstention
-from packages.config.paths import synthetic_dir
+from packages.config.paths import challenge_available, synthetic_dir
 from scripts.build_fixture_copyset import build
 
 
+@unittest.skipUnless(challenge_available(), "challenge package not present")
 class IntegrityFailureTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:

@@ -2,11 +2,11 @@ from __future__ import annotations
 
 import unittest
 
-from packages.config.paths import synthetic_dir
+from packages.config.paths import challenge_available, challenge_root, synthetic_dir
 from scripts.build_fixture_copyset import build, collect_sources, destination_for, load_hashes
-from packages.config.paths import challenge_root
 
 
+@unittest.skipUnless(challenge_available(), "challenge package not present")
 class CopysetTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:

@@ -4,9 +4,11 @@ import unittest
 
 from packages.domain.evidence import EvidenceItem, build_evidence_item
 from packages.domain.types import Abstention
+from packages.config.paths import challenge_available
 from scripts.build_fixture_copyset import build
 
 
+@unittest.skipUnless(challenge_available(), "challenge package not present")
 class EvidenceItemTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:

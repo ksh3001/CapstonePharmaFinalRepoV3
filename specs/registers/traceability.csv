@@ -110,7 +110,7 @@ AP-1,FR-010,BR-082,AC-FR010-05,TASK-018,`tests/unit/test_reference_ranges.py`,sp
 AP-1,FR-010,BR-082,AC-FR010-07,TASK-018,`tests/unit/test_reference_ranges.py`,specs/registers/business_rules_register.md,014
 AP-1,FR-010,BR-083,AC-FR010-03,TASK-018,`tests/integration/test_protocol_applicability.py`,specs/registers/business_rules_register.md,013
 AP-1,FR-010,BR-084,AC-FR010-08,TASK-013,`tests/security/test_consent_per_purpose.py`,specs/registers/business_rules_register.md,017
-AP-1,FR-010,BR-085,AC-FR010-09,TASK-008,`tests/unit/test_temporal_precision.py`,specs/registers/business_rules_register.md,018
+AP-1,FR-010,BR-085,AC-FR010-09,TASK-018,`tests/unit/test_device_skew.py`,specs/registers/business_rules_register.md,018
 AP-1,FR-011,BR-086,AC-FR011-05,TASK-017,`tests/integration/test_lims_reconciliation.py`,specs/registers/business_rules_register.md,045
 AP-1,FR-011,BR-086,AC-FR011-09,TASK-017,`tests/unit/test_contract_version_required.py`,specs/registers/business_rules_register.md,045
 AP-1,FR-011,BR-087,AC-FR011-02,TASK-017,`tests/unit/test_unit_mapping.py`,specs/registers/business_rules_register.md,024

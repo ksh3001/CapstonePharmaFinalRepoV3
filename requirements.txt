@@ -1,0 +1,2 @@
+# Azure App Service / ui deploy surface. Assessment does not install this.
+-r requirements-ui.txt

@@ -1,0 +1,83 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  assessment:
+    name: Assessment ${{ matrix.python-version }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.11", "3.12"]
+    env:
+      AEGIS_RUNTIME_MODE: assessment
+      AEGIS_LLM_ENABLED: "false"
+    steps:
+      - name: Check out
+        uses: actions/checkout@v4
+
+      - name: Set up CPython
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Setup, gates, tests, evaluate
+        run: python scripts/ci.py
+
+  hostile-locale:
+    name: Hostile locale
+    runs-on: ubuntu-latest
+    env:
+      AEGIS_RUNTIME_MODE: assessment
+      AEGIS_LLM_ENABLED: "false"
+      LANG: C
+      LC_ALL: C
+      TZ: Pacific/Kiritimati
+      PYTHONHASHSEED: "0"
+    steps:
+      - name: Check out
+        uses: actions/checkout@v4
+
+      - name: Set up CPython
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Setup and tests
+        run: python scripts/ci.py --skip-evaluate
+
+  ui:
+    name: UI extras
+    runs-on: ubuntu-latest
+    env:
+      AEGIS_RUNTIME_MODE: ui
+      AEGIS_LLM_ENABLED: "false"
+    steps:
+      - name: Check out
+        uses: actions/checkout@v4
+
+      - name: Set up CPython
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install console extras
+        run: python -m pip install -r requirements-ui.txt httpx
+
+      - name: Setup and quality gates
+        run: python scripts/ci.py --skip-evaluate
+
+      - name: FastAPI console tests
+        run: python -m unittest tests.e2e.test_fastapi_console -v

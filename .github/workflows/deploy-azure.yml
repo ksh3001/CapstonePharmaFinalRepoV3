@@ -1,0 +1,43 @@
+name: Deploy Azure Web App
+
+on:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: azure-webapp
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    name: Deploy
+    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    environment:
+      name: azure-webapp
+      url: ${{ steps.deploy.outputs.webapp-url }}
+    env:
+      AZURE_WEBAPP_NAME: ${{ vars.AZURE_WEBAPP_NAME }}
+    steps:
+      - name: Check out
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+
+      - name: Require web app name
+        run: |
+          if [ -z "${AZURE_WEBAPP_NAME}" ]; then
+            echo "Set repository variable AZURE_WEBAPP_NAME to the Azure Web App name."
+            exit 1
+          fi
+
+      - name: Deploy to Azure Web App
+        id: deploy
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: ${{ env.AZURE_WEBAPP_NAME }}
+          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
+          package: .

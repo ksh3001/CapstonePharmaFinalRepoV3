@@ -44,7 +44,12 @@ def cmd_setup(_args: argparse.Namespace) -> int:
     from scripts.build_fixture_copyset import build
     from scripts.generate_structure_manifest import write_manifest
 
-    build()
+    try:
+        build()
+    except FileNotFoundError as exc:
+        if not (synthetic_dir() / "COPYSET_MANIFEST.json").is_file():
+            raise
+        sys.stdout.write(f"setup using committed copy set ({exc})\n")
     write_manifest()
     _run_gates()
     sys.stdout.write(f"setup ok mode={runtime_mode()} llm_enabled={llm_enabled()}\n")
