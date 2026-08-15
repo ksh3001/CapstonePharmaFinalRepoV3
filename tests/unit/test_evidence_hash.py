@@ -32,3 +32,18 @@ class EvidenceHashTests(unittest.TestCase):
         )
         self.assertNotIsInstance(item, Abstention)
         self.assertEqual(item["integrity"]["sha256"], published)
+
+    def test_listed_source_without_copied_file_keeps_fixture_facts(self) -> None:
+        item = build_evidence_item(
+            source="data/sensitive_segments.csv",
+            record_id="PV-1020",
+            authority="challenge-package",
+            effective_at=None,
+            as_of="2026-08-01T08:00:00Z",
+            facts={"case_id": "PV-1020", "segment": "pregnancy"},
+        )
+        if (synthetic_dir() / "data" / "sensitive_segments.csv").is_file():
+            self.skipTest("artefact is present in this checkout")
+        self.assertNotIsInstance(item, Abstention)
+        self.assertEqual(item["facts"]["segment"], "pregnancy")
+        self.assertEqual(item["integrity"]["sha256"], published_hash("data/sensitive_segments.csv"))

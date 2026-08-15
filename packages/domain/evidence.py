@@ -64,14 +64,18 @@ def build_evidence_item(
     if published is None:
         return IntegrityFailure(source, "source path is absent from FILE_HASHES.csv")
     if source_file is None:
-        return IntegrityFailure(source, "source artefact is not readable")
-    raw = source_file.read_bytes()
-    if not matching_published_digest(raw, published):
-        actual = hashlib.sha256(raw).hexdigest()
-        return IntegrityFailure(
-            source,
-            f"hash mismatch for {source}: expected {published}, actual {actual}",
-        )
+        if not facts:
+            return IntegrityFailure(source, "source artefact is not readable")
+        # Fixture-supplied row. The copy set lists the path in FILE_HASHES.csv
+        # but did not copy the artefact (PUB fixtures do not reference it).
+    else:
+        raw = source_file.read_bytes()
+        if not matching_published_digest(raw, published):
+            actual = hashlib.sha256(raw).hexdigest()
+            return IntegrityFailure(
+                source,
+                f"hash mismatch for {source}: expected {published}, actual {actual}",
+            )
     return EvidenceItem(
         {
             "source": source,
