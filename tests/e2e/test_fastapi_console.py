@@ -32,10 +32,16 @@ class FastAPIConsoleTests(unittest.TestCase):
         self.assertIn("Runtime health", home.text)
         self.assertIn("health-strip", home.text)
         self.assertIn("Open full telemetry", home.text)
-        page = self.client.get("/workflows/batch")
+        page = self.client.get("/workflows/batch/NCB204-B24071")
         self.assertEqual(page.status_code, 200)
-        self.assertIn("remaining critical evidence", page.text.casefold())
+        lowered = page.text.casefold()
+        self.assertIn("ncb204-b24071", lowered)
         self.assertIn("hx-get=", page.text)
+        self.assertIn("not_executed", lowered)
+        self.assertTrue(
+            "remaining critical evidence" in lowered or 'class="ack"' in page.text,
+            "batch pack must show the acknowledge gate or the acknowledge control",
+        )
 
     def test_json_api_still_returns_pack(self) -> None:
         response = self.client.get("/api/workflows/batch/NCB204-B24071", headers={"X-Aegis-User": "preparer_1"})
