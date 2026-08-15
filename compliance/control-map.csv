@@ -1,4 +1,24 @@
-obligation,control,test_id,evidence_path
-EU-AIA-transparency,advisory-only-packs,tests.contract.test_invariants,specs/api/api_contracts.md
-ISO-42001-A.6,stdlib-assessment-mode,quality.static-analysis.test_no_third_party,docs/adr/ADR-003_assessment_stdlib_only.md
-INJ-006,deny-list,tests.security.test_prohibited_language,packages/contracts/deny_list.json
+obligation_id,framework,obligation,control,module,test_id,evidence_path,status
+EU-AIA-literacy,EU-AI-Act,AI literacy / instructions for use,intended-use-and-console-guide,docs/product,tests.compliance.test_tripwires,docs/product/intended-use.md,mapped
+EU-AIA-oversight,EU-AI-Act,Human oversight,approve-interrupt-and-acknowledge,packages/orchestrator,tests.orchestration.test_stdlib_runner,packages/orchestrator/graph.py,mapped
+EU-AIA-transparency,EU-AI-Act,Transparency to users,advisory-only-packs,packages/contracts,tests.contract.test_invariants,specs/api/api_contracts.md,mapped
+EU-AIA-logging,EU-AI-Act,Record-keeping / logging,hash-linked-evidence-chain,packages/evidence_store,tests.compliance.test_tripwires,ops/runbooks/incident.md,mapped
+EU-AIA-security,EU-AI-Act,Accuracy robustness security,security-and-eval-suite,tests/security,tests.security.test_prohibited_language,packages/contracts/deny_list.json,mapped
+EU-AIA-risk,EU-AI-Act,Risk management,benefit-and-metric-conflicts,docs/product,tests.compliance.test_benefit_claims,docs/product/business-case.md,mapped
+EU-AIA-docs,EU-AI-Act,Technical documentation,architecture-and-adrs,docs/architecture,tests.compliance.test_tripwires,docs/architecture/aegis-architecture.json,mapped
+EU-AIA-data,EU-AI-Act,Data governance,residency-and-purpose,packages/kernel,tests.security.test_residency,compliance/eu-ai-act/residency-policy.json,mapped
+EU-AIA-incident,EU-AI-Act,Incident handling,kill-switch-and-runbook,ops/runbooks,tests.resilience.test_kill_switch,ops/runbooks/incident.md,mapped
+EU-AIA-TW-write,EU-AI-Act,Artefact 19 §7 write tool,read-only-tools-and-mutations,services/integration/mcp,tests.security.test_no_action_controls,services/integration/mcp/tools.py,mapped
+EU-AIA-TW-review,EU-AI-Act,Artefact 19 §7 forced review,approve-and-contestability,services/api,tests.compliance.test_tripwires,packages/config/agents.yaml,mapped
+EU-AIA-TW-model,EU-AI-Act,Artefact 19 §7 model pin,pinned-model-registry,compliance/eu-ai-act,tests.compliance.test_tripwires,compliance/eu-ai-act/model-registry.json,mapped
+EU-AIA-TW-region,EU-AI-Act,Artefact 19 §7 residency,analysed-region-policy,compliance/eu-ai-act,tests.compliance.test_tripwires,compliance/eu-ai-act/residency-policy.json,mapped
+EU-AIA-TW-deny,EU-AI-Act,Artefact 19 §7 deny-list shrink,signed-deny-list-baseline,packages/contracts,tests.security.test_prohibited_language,packages/contracts/deny_list.baseline.json,mapped
+EU-AIA-TW-eval,EU-AI-Act,Artefact 19 §7 loosened grader,frozen-eval-thresholds,evals,tests.compliance.test_tripwires,evals/thresholds.baseline.yaml,mapped
+ISO-42001-4,ISO-42001,Clause 4 context and scope,aims-scope,docs/governance,tests.compliance.test_tripwires,docs/governance/aims-scope.md,mapped
+ISO-42001-5,ISO-42001,Clause 5 leadership and AI policy,ai-policy,docs/governance,tests.compliance.test_tripwires,docs/governance/ai-policy.md,mapped
+ISO-42001-6,ISO-42001,Clause 6 planning,success-metrics-and-business-case,docs/product,tests.compliance.test_metric_conflicts,docs/product/success-metrics.md,mapped
+ISO-42001-A.6,ISO-42001,Annex A assessment mode,stdlib-assessment-mode,packages,quality.static-analysis.test_no_third_party,docs/adr/ADR-003_assessment_stdlib_only.md,mapped
+ISO-42001-8,ISO-42001,Clause 8 lifecycle,change-class-baseline,compliance/iso42001,tests.compliance.test_change_classes,compliance/iso42001/change-class-baseline.json,mapped
+ISO-42001-9,ISO-42001,Clause 9 performance,eval-thresholds,evals,tests.compliance.test_tripwires,evals/thresholds.yaml,mapped
+ISO-42001-10,ISO-42001,Clause 10 improvement,incident-runbook,ops/runbooks,tests.resilience.test_kill_switch,ops/runbooks/incident.md,mapped
+INJ-006,INJ,Prohibited action language,deny-list,packages/contracts,tests.security.test_prohibited_language,packages/contracts/deny_list.json,mapped

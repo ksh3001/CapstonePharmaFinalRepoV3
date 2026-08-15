@@ -1,0 +1,12 @@
+{
+  "files": {
+    "packages/contracts/deny_list.json": "7adfdfcec5311066921c09f9bfa89bf4bbb79c0ea64c8df1fbf65afa69c02bce",
+    "packages/contracts/deny_list.baseline.json": "8a89447037e526c2d95563e882ae11ddff6092fc8e7470ddf77a8fd00f7348f7",
+    "evals/thresholds.yaml": "31683ac387dac46d864de3f14313567f9bb1f4d08bacd31a16e7c7c6b10c3360",
+    "evals/thresholds.baseline.yaml": "31683ac387dac46d864de3f14313567f9bb1f4d08bacd31a16e7c7c6b10c3360",
+    "evals/graders/deterministic/groundedness.py": "768e8c93dc7220aad42d19e9e1592265e7b54d468173ca2203fa7b80b1705dd5",
+    "packages/advice/brief.py": "e092ecfb72a6d903f348175e819499fb5576bfeef005aa3336e9856ca457fad9",
+    "services/integration/mcp/tools.py": "3f9c31cefe1a13f22378302659d059d673d0fdd8e8814b562b8e66828642b899",
+    "services/integration/azure/openai.py": "607c1cd34572b7cee702dccc3adba15ac8f24fb3ee0208fe9c8cebd27a4480ae"
+  }
+}

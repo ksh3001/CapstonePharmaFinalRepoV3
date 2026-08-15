@@ -1,0 +1,3 @@
+determinism_excluded_fields: []
+subgroup_spread_max: 0.15
+judge_gating: false

@@ -1,0 +1,5 @@
+{
+  "analysed_lens": "EU deployer",
+  "permitted_regions": ["EU", "EU-West", "OnPrem-DE", "eastus"],
+  "notes": "eastus is the recorded local demo endpoint region. It is not a production residency decision."
+}
