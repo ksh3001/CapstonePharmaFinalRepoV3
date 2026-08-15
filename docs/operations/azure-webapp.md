@@ -42,10 +42,10 @@ The site URL is `https://<app-name>.azurewebsites.net/`. Liveness: `/healthz`.
 
 ## 3. What CI runs
 
-`python scripts/ci.py` is the platform-neutral command. The workflow wraps it:
+`python scripts/ci.py` is the platform-neutral command. It always runs `python -m aegis test` (every `test_*.py` under `tests/` and `quality/static-analysis/`). A failure or error fails the job; deploy waits for CI to succeed.
 
-- Assessment on CPython 3.11 and 3.12 (zero pip installs): setup, quality-gate tests, evaluate
-- One hostile `LANG` / `TZ` / `PYTHONHASHSEED` job
-- One UI job that installs `requirements-ui.txt` and runs the FastAPI console tests
+- Assessment on CPython 3.11 and 3.12 (zero pip installs): setup, full suite, evaluate
+- One hostile `LANG` / `TZ` / `PYTHONHASHSEED` job with the same suite
+- One UI job that installs `requirements-ui.txt` and runs the same suite so FastAPI cases are not skipped
 
-The full `python -m aegis test` suite still needs the sibling FDE challenge package (or `AEGIS_CHALLENGE_ROOT`). GitHub runners do not have that tree, so CI uses the committed copy set plus the gates.
+Tests that need the sibling FDE challenge package (`AEGIS_CHALLENGE_ROOT`) skip on GitHub. A skip does not fail the pipeline.

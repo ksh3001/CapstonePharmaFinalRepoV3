@@ -33,7 +33,7 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
 
-      - name: Setup, gates, tests, evaluate
+      - name: Setup, full test suite, evaluate
         run: python scripts/ci.py
 
   hostile-locale:
@@ -55,7 +55,7 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Setup and tests
+      - name: Setup and full test suite
         run: python scripts/ci.py --skip-evaluate
 
   ui:
@@ -76,8 +76,5 @@ jobs:
       - name: Install console extras
         run: python -m pip install -r requirements-ui.txt httpx
 
-      - name: Setup and quality gates
+      - name: Setup and full test suite
         run: python scripts/ci.py --skip-evaluate
-
-      - name: FastAPI console tests
-        run: python -m unittest tests.e2e.test_fastapi_console -v
