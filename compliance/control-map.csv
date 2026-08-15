@@ -1,0 +1,4 @@
+obligation,control,test_id,evidence_path
+EU-AIA-transparency,advisory-only-packs,tests.contract.test_invariants,specs/api/api_contracts.md
+ISO-42001-A.6,stdlib-assessment-mode,quality.static-analysis.test_no_third_party,docs/adr/ADR-003_assessment_stdlib_only.md
+INJ-006,deny-list,tests.security.test_prohibited_language,packages/contracts/deny_list.json

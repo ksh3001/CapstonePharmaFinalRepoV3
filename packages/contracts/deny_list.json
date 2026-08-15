@@ -1,0 +1,41 @@
+{
+  "version": "1.0",
+  "baseline_sha256": "457ca477cadc3ece45381a88cd6d6d860b1af4836d6a4fbf9e2c7b34bc49802b",
+  "categories": [
+    "batch release or rejection",
+    "disposition setting",
+    "PV causality, seriousness, expectedness or reportability conclusions",
+    "clinical eligibility determinations",
+    "stock reservation, allocation or shipment",
+    "quality-status change",
+    "recall initiation",
+    "regulatory submission",
+    "approval or signature language"
+  ],
+  "phrases": [
+    "approved for release",
+    "rejected for release",
+    "batch released",
+    "disposition: released",
+    "set disposition",
+    "causal relationship established",
+    "seriousness assessed",
+    "event is expected",
+    "reportable to the agency",
+    "patient is eligible",
+    "clinically eligible",
+    "stock reserved",
+    "allocate stock",
+    "ship the order",
+    "quality status changed",
+    "initiate recall",
+    "recall initiated",
+    "submit to the agency",
+    "electronically signed",
+    "approved and signed",
+    "patient is ineligible",
+    "screen failure",
+    "commitment was met",
+    "submission was accepted"
+  ]
+}

@@ -1,0 +1,3 @@
+sha256=cf2c0467c60726067ac399841061253fa3ecbca0c67b01a84b837c131da81dfd
+file=apps/web/static/htmx.min.js
+note=HTMX-compatible subset vendored for zero-install assessment.

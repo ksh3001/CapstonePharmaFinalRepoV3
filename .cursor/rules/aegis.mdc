@@ -1,0 +1,11 @@
+---
+description: AEGIS product constraints for the sibling aegis-sdd repository
+alwaysApply: true
+---
+
+- `packages/` is stdlib plus other permitted `packages.*` modules. No third-party imports.
+- Do not construct Contradiction, Gap, or Abstention outside `packages/domain`.
+- Do not call `write_audit` outside `packages/kernel`.
+- Derive times from `as_of`. Never use `datetime.now`, `time.time`, `uuid4`, or `random` in `packages/`.
+- Do not modify challenge-package evidence. Copy through the copy-set script.
+- Cursor hooks and `mcp.json` are TASK-001b, not Phase 0.

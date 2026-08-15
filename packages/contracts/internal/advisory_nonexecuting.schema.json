@@ -1,0 +1,171 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "advisory_nonexecuting.schema.json",
+  "title": "Advisory non-executing response (team-authored)",
+  "description": "Response contract for the seven public fixtures that declare response_contract = 'advisory_nonexecuting' (PUB-09, PUB-10, PUB-11, PUB-12, PUB-13, PUB-15 and PUB-14), and for team-derived scenarios in features that declare this contract without a public fixture. TEAM-AUTHORED: this schema is not part of the challenge evidence package. It is derived from the invariant core shared by batch_response, pv_response and supply_response and may add obligations but must never relax one. See AMB-01 in the master build plan. The workflow enum is derived from the FEATURE set, not the fixture set: every feature declaring this contract must have a value here, which is asserted by tests/contract/test_contract_representability.py.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "request_id",
+    "scenario_id",
+    "workflow",
+    "as_of",
+    "authorization",
+    "evidence",
+    "contradictions",
+    "gaps",
+    "abstentions",
+    "findings",
+    "required_reviews",
+    "human_review",
+    "execution_status",
+    "gate_outcome",
+    "no_side_effects",
+    "audit"
+  ],
+  "properties": {
+    "request_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "scenario_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "workflow": {
+      "enum": [
+        "security",
+        "reliability",
+        "privacy",
+        "integration",
+        "agent",
+        "finops",
+        "clinical",
+        "regulatory"
+      ]
+    },
+    "as_of": {
+      "type": "string",
+      "minLength": 1
+    },
+    "authorization": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "user",
+        "purpose",
+        "checked_at",
+        "decision"
+      ],
+      "properties": {
+        "user": {
+          "type": "string"
+        },
+        "purpose": {
+          "type": "string"
+        },
+        "checked_at": {
+          "type": "string"
+        },
+        "decision": {
+          "enum": [
+            "allow",
+            "deny"
+          ]
+        },
+        "reason": {
+          "type": "string"
+        }
+      }
+    },
+    "evidence": {
+      "type": "array",
+      "items": {
+        "$ref": "evidence_item.schema.json"
+      }
+    },
+    "contradictions": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+    "gaps": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+    "abstentions": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+    "findings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "finding_id",
+          "statement",
+          "evidence_refs"
+        ],
+        "properties": {
+          "finding_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "statement": {
+            "type": "string",
+            "minLength": 1
+          },
+          "evidence_refs": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "severity": {
+            "enum": [
+              "info",
+              "concern",
+              "blocking"
+            ]
+          }
+        }
+      }
+    },
+    "required_reviews": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "human_review": {
+      "type": "object"
+    },
+    "execution_status": {
+      "const": "not_executed"
+    },
+    "gate_outcome": {
+      "enum": [
+        "advisory_only",
+        "gate_enforced",
+        "abstained",
+        "escalated",
+        "partial_coverage"
+      ]
+    },
+    "no_side_effects": {
+      "const": true
+    },
+    "metrics": {
+      "type": "object"
+    },
+    "audit": {
+      "type": "object"
+    }
+  }
+}

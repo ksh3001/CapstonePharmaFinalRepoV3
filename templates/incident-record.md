@@ -1,0 +1,1 @@
+# Incident record template

@@ -1,0 +1,814 @@
+{
+  "meta": {
+    "system": "AEGIS",
+    "title": "Advisory HITL evidence reconciliation",
+    "version": "1.0",
+    "as_of": "2026-08-15",
+    "repo": "aegis-sdd",
+    "purpose": "Machine-readable architecture for AI agents and the interactive HTML diagram.",
+    "source_of_truth": "packages/domain decides. Agents sequence; they do not classify.",
+    "not": [
+      "batch disposition",
+      "PV decision",
+      "eligibility",
+      "allocation",
+      "recall",
+      "Cosmos DB product graph",
+      "Node / Next.js application",
+      "electronic signature (21 CFR Part 11 / Annex 11)"
+    ],
+    "constraints": {
+      "MR-5": "Contradiction, Gap, Abstention may be constructed only in packages/domain.",
+      "MR-6": "write_audit may be called only from packages/kernel.",
+      "stdlib_packages": "packages/ imports stdlib and packages.* only. No third-party.",
+      "time": "Derive times from as_of. No datetime.now, time.time, uuid4, or random in packages/.",
+      "challenge_evidence": "Do not modify challenge-package evidence. Copy through the copy-set script.",
+      "console": "FR-008: the console contains no business rule (BR-064). Notifications are out of scope."
+    },
+    "runtime_modes": {
+      "assessment": "Default graded mode. Stdlib only. No network. No model. StdlibOrchestrator.",
+      "ai_disabled": "Kill switch. Same regulated fields as assessment. NullInference.",
+      "advisory": "Deployed default. LangGraph wrapper. Azure OpenAI narrative if AEGIS_LLM_ENABLED=true.",
+      "ui": "FastAPI console. LangGraph wrapper. Inference not allowed even if LLM env is on.",
+      "cloud": "Demo adapters (Redis, MCP HTTP, Blob WORM). Never required to grade."
+    },
+    "env": {
+      "AEGIS_RUNTIME_MODE": "assessment | ai_disabled | advisory | ui | cloud",
+      "AEGIS_LLM_ENABLED": "Honoured in every mode; forced false in assessment and ai_disabled.",
+      "AEGIS_EVIDENCE_ROOT": "Override for out/evidence/",
+      "AEGIS_ALLOW_KEY_AUTH": "Must be 'dev' for a live Azure call."
+    },
+    "agents": {
+      "AG-1": {"name": "Supervisor", "inference": false, "steps": ["plan", "approve"], "interrupts": ["approve"]},
+      "AG-2": {"name": "Evidence retrieval", "inference": false, "steps": ["retrieve", "project_graph"], "tools": ["source_adapter"]},
+      "AG-3": {"name": "Batch reconciliation", "inference": true, "steps": ["reconcile", "annotate"], "model_risk_class": "annotations_only"},
+      "AG-4": {"name": "PV intake", "inference": true, "steps": ["reconcile", "annotate"], "model_risk_class": "annotations_only"},
+      "AG-5": {"name": "Supply options", "inference": true, "steps": ["reconcile", "annotate"], "model_risk_class": "annotations_only"},
+      "AG-6": {"name": "Review packager", "inference": false, "steps": ["package"], "interrupts": ["acknowledge"]}
+    },
+    "declared_steps": [
+      "admit",
+      "plan",
+      "retrieve",
+      "project_graph",
+      "reconcile",
+      "annotate",
+      "approve",
+      "package",
+      "validate_emit"
+    ],
+    "mcp_tools": [
+      "get_evidence_pack",
+      "get_evidence_item",
+      "explain_abstention",
+      "get_inject_coverage",
+      "get_graph_neighbourhood"
+    ],
+    "features": [
+      "FR-001 batch evidence",
+      "FR-002 PV intake",
+      "FR-003 supply / cold-chain",
+      "FR-004 provenance",
+      "FR-005 policy/trust/privacy",
+      "FR-006 agent orchestration HITL",
+      "FR-007 FinOps",
+      "FR-008 human review console",
+      "FR-009 continuity",
+      "FR-010 clinical protocol",
+      "FR-011 interface reconciliation",
+      "FR-012 regulatory records",
+      "FR-013 AI advisory (Azure OpenAI only)",
+      "FR-014 evidence store"
+    ]
+  },
+  "nodes": [
+    {
+      "id": "reviewer",
+      "label": "HITL reviewer",
+      "layer": "actor",
+      "kind": "actor",
+      "path": "specs/features/FR-008_human_review_console.md",
+      "tooltip": "Qualified person, safety physician, supply governance, or auditor. Opens a pack, opens critical evidence, then acknowledges or contests. Judgement is the output. Acknowledgement is not a signature and not a disposition.",
+      "produces": "reviewer_action on the evidence chain",
+      "must_not": "Release, reject, allocate, ship, code a case, confirm a signal, or decide eligibility."
+    },
+    {
+      "id": "cli",
+      "label": "aegis CLI",
+      "layer": "actor",
+      "kind": "entry",
+      "path": "aegis/cli.py",
+      "tooltip": "Stdlib façade: setup, run, test, evaluate, reset, evidence-export, verify-evidence, serve, mcp. python -m aegis. Imports packages/* only except serve/mcp which reach services/.",
+      "produces": "Canonical JSON pack on stdout (run); HTTP console (serve); stdio MCP (mcp).",
+      "must_not": "Classify contradictions or write audit events itself."
+    },
+    {
+      "id": "mcp_host",
+      "label": "MCP host",
+      "layer": "actor",
+      "kind": "entry",
+      "path": ".cursor/mcp.json",
+      "tooltip": "Cursor or another MCP client. Talks to the read-only AEGIS engine over HTTP /mcp or stdio. Advisory only. Catalog ids: NCB204-B24071, PV-1001, SH-901.",
+      "produces": "Tool calls: get_evidence_pack, get_evidence_item, explain_abstention, get_inject_coverage, get_graph_neighbourhood.",
+      "must_not": "Mutate packs or acknowledge through MCP. Tools are read-only."
+    },
+    {
+      "id": "stdlib_http",
+      "label": "Stdlib HTTP",
+      "layer": "transport",
+      "kind": "transport",
+      "path": "services/api/server.py",
+      "tooltip": "ThreadingHTTPServer + ConsoleHandler. Zero-install assessment console. dispatch() is the single router. Used when FastAPI is not installed.",
+      "produces": "HTML from console.py and JSON from handle().",
+      "must_not": "Compute remaining-critical or SoD in the transport."
+    },
+    {
+      "id": "fastapi",
+      "label": "FastAPI + uvicorn",
+      "layer": "transport",
+      "kind": "transport",
+      "path": "services/api/fastapi_app.py",
+      "tooltip": "Optional ui/cloud transport. Catch-all delegates to the same dispatch(..., renderer='jinja'). Not required to grade. Absent from packages/.",
+      "produces": "Same routes as stdlib, Jinja templates from apps/web/templates/.",
+      "must_not": "Own business rules or a second API surface."
+    },
+    {
+      "id": "mcp_server",
+      "label": "MCP server",
+      "layer": "transport",
+      "kind": "transport",
+      "path": "services/integration/mcp/server.py",
+      "tooltip": "JSON-RPC over stdio (python -m aegis mcp) or POST /mcp. handle_rpc → call_tool. Pack chat uses the same tools via ask.answer_question.",
+      "produces": "Read-only tool results. Console ask adds a deterministic narrative, not a live model tool-choice.",
+      "must_not": "Let the model pick the tool. ask.py routes from question text."
+    },
+    {
+      "id": "dispatch",
+      "label": "dispatch()",
+      "layer": "api",
+      "kind": "api",
+      "path": "services/api/server.py",
+      "tooltip": "Single HTTP router for pages, static, session cookie, /api/*, HTMX fragments, and /mcp. Form POSTs to /api/reviews/* return a toast fragment when HX-Request is set.",
+      "produces": "HTML documents, HTMX fragments, or JSON.",
+      "must_not": "Assemble or classify a pack."
+    },
+    {
+      "id": "handlers",
+      "label": "JSON API handle()",
+      "layer": "api",
+      "kind": "api",
+      "path": "services/api/handlers.py",
+      "tooltip": "Canonical API. GET workflows load a fixture and run the orchestrator. GET /api/evidence/{id} marks opened. POST acknowledge/contest are the only mutations. SoD and critical-evidence gates are re-checked on POST.",
+      "produces": "Validated pack JSON; review events; health; history; ask answers.",
+      "must_not": "Introduce a regulated-action route (BR-068)."
+    },
+    {
+      "id": "console",
+      "label": "HITL console",
+      "layer": "api",
+      "kind": "ui",
+      "path": "services/api/console.py",
+      "tooltip": "Server-rendered FR-008 console. Formats packs; computes no rule (BR-064). Pages: Dashboard, Batch, PV, Supply, Contradictions, Status, Evidence history, Gates, Injects, Agents, Runtime health. HTMX for evidence drawer and follow-up save.",
+      "produces": "HTML. Toast 'Data saved' after Store follow-up as evidence.",
+      "must_not": "Derive, round, sort, or reconcile values. No notification inbox (FR-008 out of scope)."
+    },
+    {
+      "id": "orch_port",
+      "label": "OrchestratorPort",
+      "layer": "orchestration",
+      "kind": "orchestrator",
+      "path": "packages/orchestrator/resolve.py",
+      "tooltip": "resolve_orchestrator() returns StdlibOrchestrator. services/integration/langgraph/resolve.py wraps it in advisory/ui/cloud when langgraph is installed.",
+      "produces": "A runner that executes DECLARED_STEPS in order.",
+      "must_not": "Let the model choose the next step (BR-049)."
+    },
+    {
+      "id": "stdlib_orch",
+      "label": "StdlibOrchestrator",
+      "layer": "orchestration",
+      "kind": "orchestrator",
+      "path": "packages/orchestrator/deterministic.py",
+      "tooltip": "begin → advance each declared step → finish. Budget admission and wallet check in begin. Domain work happens in the package step via kernel packs. Assessment always uses this runner.",
+      "produces": "Final pack dict plus human_review.orchestration metadata.",
+      "must_not": "Construct Contradiction, Gap, or Abstention."
+    },
+    {
+      "id": "langgraph",
+      "label": "LangGraph adapter",
+      "layer": "orchestration",
+      "kind": "adapter",
+      "path": "services/integration/langgraph/adapter.py",
+      "tooltip": "StateGraph nodes are the nine DECLARED_STEPS. Each node calls StdlibOrchestrator.advance. Optional interrupt_on_approve. Falls back to StdlibOrchestrator if langgraph is missing.",
+      "produces": "Same pack as the stdlib runner. Optional gate_outcome: awaiting_human.",
+      "must_not": "Put domain classification in a LangGraph node."
+    },
+    {
+      "id": "declared_steps",
+      "label": "DECLARED_STEPS",
+      "layer": "orchestration",
+      "kind": "orchestrator",
+      "path": "packages/orchestrator/graph.py",
+      "tooltip": "admit → plan → retrieve → project_graph → reconcile → annotate → approve → package → validate_emit. Roles: kernel, AG-1…AG-6. Workflow agents: batch AG-3, PV AG-4, supply AG-5.",
+      "produces": "Fixed step order and role_for_step(step, workflow).",
+      "must_not": "Be chosen or reordered by a model."
+    },
+    {
+      "id": "lifecycle",
+      "label": "start_request",
+      "layer": "kernel",
+      "kind": "kernel",
+      "path": "packages/kernel/lifecycle.py",
+      "tooltip": "Request bootstrap: interpreter guard, write_audit(request_start), authorize, derive_request_id from as_of. Returns request_id, mode, authorization, execution_status, llm_enabled.",
+      "produces": "Request context dict.",
+      "must_not": "Use wall-clock time or uuid4."
+    },
+    {
+      "id": "authz",
+      "label": "authorize",
+      "layer": "kernel",
+      "kind": "kernel",
+      "path": "packages/kernel/authz.py",
+      "tooltip": "Purpose + role + entitlement check. Unregistered purpose is a deny. checked_at is derived from as_of. Entitlements are live-loaded, never cached.",
+      "produces": "{user, purpose, checked_at, decision}.",
+      "must_not": "Cache authz, consent, hold, or residency (AP-9)."
+    },
+    {
+      "id": "audit",
+      "label": "write_audit",
+      "layer": "kernel",
+      "kind": "kernel",
+      "path": "packages/kernel/audit.py",
+      "tooltip": "Sole audit writer (MR-6). Call sites: lifecycle, authz, checkpoint, privacy, packs. Review acknowledge/contest also write through handlers → kernel.",
+      "produces": "In-process audit trail records.",
+      "must_not": "Be imported or called from services, domain, or the console."
+    },
+    {
+      "id": "packs",
+      "label": "kernel packs",
+      "layer": "kernel",
+      "kind": "kernel",
+      "path": "packages/kernel/packs.py",
+      "tooltip": "batch_pack, pv_pack, supply_pack, advisory_pack. Start request, privacy, domain reconcile_*, sort, emission controls, persist_run. Then optional inference annotation.",
+      "produces": "Schema-valid pack with execution_status=not_executed.",
+      "must_not": "Construct classification types. Only assemble .as_dict() outputs."
+    },
+    {
+      "id": "privacy",
+      "label": "privacy + checkpoint",
+      "layer": "kernel",
+      "kind": "kernel",
+      "path": "packages/kernel/privacy.py",
+      "tooltip": "evaluate_privacy, apply_emission_controls, filter_withheld_subjects. Checkpoint freshness and replay live in kernel/checkpoint.py. Replay is idempotent by input hash.",
+      "produces": "Filtered fixture and emission-controlled pack. Replay bytes when fresh.",
+      "must_not": "Cache privacy or hold state."
+    },
+    {
+      "id": "batch",
+      "label": "reconcile_batch",
+      "layer": "domain",
+      "kind": "engine",
+      "path": "packages/domain/batch.py",
+      "tooltip": "Workflow A / AG-3 / FR-001. Genealogy vs warehouse, OOS LIMS, organism ID, unit-mapping abstentions, cleaning-boundary gaps, PAT/recipe desync. Readiness: insufficient_evidence | conflicted_evidence | ready_for_authorized_review.",
+      "produces": "evidence, contradictions, gaps, abstentions, applicable_documents, readiness_state.",
+      "must_not": "Dispose a batch or pick a winner on a contradiction."
+    },
+    {
+      "id": "pv",
+      "label": "reconcile_pv",
+      "layer": "domain",
+      "kind": "engine",
+      "path": "packages/domain/pv.py",
+      "tooltip": "Workflow B / AG-4 / FR-002. Language-out-of-scope abstentions, social minimum-criteria gaps, listedness contradictions, duplicate candidates, MedDRA coding retained, required_reviews.",
+      "produces": "source_facts, duplicate_candidates, clock_evidence, terminology, listedness_context, classifications.",
+      "must_not": "Code a case, confirm a signal, or decide listedness."
+    },
+    {
+      "id": "supply",
+      "label": "reconcile_supply",
+      "layer": "domain",
+      "kind": "engine",
+      "path": "packages/domain/supply.py",
+      "tooltip": "Workflow C / AG-5 / FR-003. Cold-chain logger contradictions, serialisation gaps, CMO overcommit findings, recall-scope abstention. Options are draft and never ranked.",
+      "produces": "options[], constraints[], quality_holds[], approvals_required[], classifications.",
+      "must_not": "Allocate, reserve, ship, or present an unqualified substitute as available supply."
+    },
+    {
+      "id": "types",
+      "label": "Contradiction / Gap / Abstention",
+      "layer": "domain",
+      "kind": "engine",
+      "path": "packages/domain/types.py",
+      "tooltip": "The only place these types may be constructed (MR-5 / ADR-002). .as_dict() feeds pack arrays. IntegrityFailure extends Abstention in evidence.py.",
+      "produces": "Classification objects for pack arrays.",
+      "must_not": "Be constructed outside packages/domain. Module-boundary gate fails the build."
+    },
+    {
+      "id": "advisory",
+      "label": "Advisory engines",
+      "layer": "domain",
+      "kind": "engine",
+      "path": "packages/domain/clinical.py",
+      "tooltip": "reconcile_clinical, regulatory, continuity, interfaces, authority, tools, finops, links. Merged by advisory_pack for PUB-09…15 style fixtures. Still domain-owned classifications.",
+      "produces": "Advisory pack body for non-A/B/C workflows.",
+      "must_not": "Relax the advisory_nonexecuting contract."
+    },
+    {
+      "id": "graph",
+      "label": "Graph projection",
+      "layer": "crosscut",
+      "kind": "crosscut",
+      "path": "packages/graph/builder.py",
+      "tooltip": "In-process property graph from RELATIONSHIP_MODEL.csv. Never a system of record. Trust gate: untrusted nodes cannot source grounding edges. Forbidden: RELEASED, ALLOCATED_TO, SIGNAL_CONFIRMED.",
+      "produces": "Projection + graph_summary on human_review.graph_projection.",
+      "must_not": "Persist to Cosmos DB or encode a regulated disposition as an edge."
+    },
+    {
+      "id": "ontology",
+      "label": "Ontology",
+      "layer": "crosscut",
+      "kind": "crosscut",
+      "path": "packages/ontology/",
+      "tooltip": "Units (compare, never convert), identity tiers, preserve_time, terminology, trust_for_document, embedded-instruction scanner. Describes disagreement; does not resolve it.",
+      "produces": "ComparisonResult, Identifier, TimePoint, Coding, TrustStatus.",
+      "must_not": "Apply an unapproved unit mapping or invent a converted value."
+    },
+    {
+      "id": "finops",
+      "label": "FinOps",
+      "layer": "crosscut",
+      "kind": "crosscut",
+      "path": "packages/finops/",
+      "tooltip": "admit_budgets, exhausted(steps|tokens|tool_calls), wallet ceiling, price_tokens from model_costs.csv (listed large-1). Partial cost: missing human review, platform, observability.",
+      "produces": "Budget dict, stop reason, priced token costs on llm chain records.",
+      "must_not": "Estimate tokens. Cost is recorded_tokens × listed unit price or unpriced."
+    },
+    {
+      "id": "contracts",
+      "label": "Contracts + deny-list",
+      "layer": "crosscut",
+      "kind": "crosscut",
+      "path": "packages/contracts/",
+      "tooltip": "Stdlib JSON Schema subset. batch/pv/supply/evidence_item + advisory_nonexecuting. grade() / assert_clean() deny execution language. invariants: execution_status == not_executed.",
+      "produces": "SchemaError, DenyListError, or a clean pack.",
+      "must_not": "Default an unknown response_contract."
+    },
+    {
+      "id": "config",
+      "label": "Config",
+      "layer": "crosscut",
+      "kind": "crosscut",
+      "path": "packages/config/",
+      "tooltip": "runtime_mode, llm_enabled, inference_allowed, roles.yaml, entitlements.yaml, agents.yaml, budgets, PURPOSE_REGISTER, catalog entities, paths. Kill switch is AEGIS_LLM_ENABLED and ai_disabled mode.",
+      "produces": "Mode, entitlements, agent capability boundaries, entity catalog.",
+      "must_not": "Cache entitlements or hold state."
+    },
+    {
+      "id": "inference_port",
+      "label": "InferencePort",
+      "layer": "advice",
+      "kind": "advice",
+      "path": "packages/advice/port.py",
+      "tooltip": "Protocol. resolve_inference() default is NullInference. Azure adapter is set from services via set_inference_port. advice must not import domain.",
+      "produces": "{called, annotations?, reason, tokens}.",
+      "must_not": "Write regulated pack fields. Annotations only, labelled model-generated."
+    },
+    {
+      "id": "azure",
+      "label": "Azure OpenAI",
+      "layer": "advice",
+      "kind": "adapter",
+      "path": "services/integration/azure/openai.py",
+      "tooltip": "FR-013 only. Narrative summary of an already-computed pack. Live call only with AEGIS_ALLOW_KEY_AUTH=dev, residency and model-version checks. Assessment uses stub_advice. Pack chat does not call this for tool choice.",
+      "produces": "human_review.annotations + persist_llm (hash, tokens, cost). Never the prompt body.",
+      "must_not": "Change findings, contradictions, gaps, abstentions, or readiness_state."
+    },
+    {
+      "id": "null_inf",
+      "label": "NullInference",
+      "layer": "advice",
+      "kind": "advice",
+      "path": "packages/advice/null.py",
+      "tooltip": "Default and kill-switch adapter. generate() returns called=False, reason=null. Assessment and ai_disabled always land here.",
+      "produces": "Empty annotation result. Pack regulated fields unchanged.",
+      "must_not": "Be bypassed in assessment."
+    },
+    {
+      "id": "guards",
+      "label": "Advice guards G-1…G-5",
+      "layer": "advice",
+      "kind": "advice",
+      "path": "packages/advice/guards.py",
+      "tooltip": "guard_advice(pack, advice). Fail-closed. Evidence brief is minimised; prompt SHA-256 stored, not the prompt. Cassettes replay by prompt hash for evals.",
+      "produces": "{passed, check, reason?, advice?}.",
+      "must_not": "Pass ungrounded or execution-shaped model text into the pack."
+    },
+    {
+      "id": "evidence_writer",
+      "label": "persist_run / llm / review",
+      "layer": "store",
+      "kind": "store",
+      "path": "packages/evidence_store/writer.py",
+      "tooltip": "Append-only writer. persist_run writes request, inputs, pack hash, decisions, audit tail, outcome. persist_llm writes tokens and listed cost. persist_review writes reviewer_action (signature=false, execution=false).",
+      "produces": "Hash-chained JSONL records.",
+      "must_not": "Store API keys, patient_id, or prompt plaintext (scan.assert_clean_payload)."
+    },
+    {
+      "id": "evidence_chain",
+      "label": "Evidence chain",
+      "layer": "store",
+      "kind": "store",
+      "path": "packages/evidence_store/chain.py",
+      "tooltip": "out/evidence/chains/<request_id>.jsonl. Record types: request, inputs, pack, decisions, audit, review, llm, guard, outcome, expiry, hold_refusal. verify_chain / verify_all.",
+      "produces": "Append-only ledger. History page reads review records.",
+      "must_not": "Be rewritten. Expiry of llm records is retention, not silent delete of the run."
+    },
+    {
+      "id": "observability",
+      "label": "runtime_health",
+      "layer": "store",
+      "kind": "crosscut",
+      "path": "packages/observability/health.py",
+      "tooltip": "In-process rollup of chains + kernel audit. Tokens, listed LLM cost, denials, wallet, deployments. Explicitly not OpenTelemetry. No collector or exporter.",
+      "produces": "/api/health snapshot and the Runtime health page.",
+      "must_not": "Add an OTel SDK under packages/."
+    },
+    {
+      "id": "ask",
+      "label": "Pack chat",
+      "layer": "hitl",
+      "kind": "ui",
+      "path": "services/integration/mcp/ask.py",
+      "tooltip": "POST /api/ask. Deterministic tool router from the question text, then a labelled model restatement of the tool result only (narrate.py). Not a disposition. Floating panel, not a notification inbox.",
+      "produces": "Tool card + narrative blocks in #engine-thread.",
+      "must_not": "Act, dispose, or let the model choose tools."
+    },
+    {
+      "id": "status",
+      "label": "Status + contradictions",
+      "layer": "hitl",
+      "kind": "ui",
+      "path": "services/api/console.py",
+      "tooltip": "Work queue for packs in this process. Acknowledge and Store follow-up as evidence. Contradictions board keeps both positions; contest stores action_taken against subject_id. HTMX stays on the page and shows Data saved.",
+      "produces": "review records + in-memory follow-up timeline.",
+      "must_not": "Settle a disagreement or act as a signature."
+    },
+    {
+      "id": "history",
+      "label": "Evidence history",
+      "layer": "hitl",
+      "kind": "ui",
+      "path": "packages/evidence_store/history.py",
+      "tooltip": "list_review_events() over all chain files. Acknowledgements, contests, evidence_opened. The ledger, not the work queue. Status is the queue; this page is the chain.",
+      "produces": "/history table and /api/history JSON.",
+      "must_not": "Treat a review row as a 21 CFR Part 11 signature."
+    },
+    {
+      "id": "fixtures",
+      "label": "Synthetic fixtures",
+      "layer": "actor",
+      "kind": "data",
+      "path": "tests/fixtures/synthetic/",
+      "tooltip": "Hash-verified copy set. PUB-01…15 public fixtures, CSVs including RELATIONSHIP_MODEL.csv, model_costs.csv, knowledge docs. Challenge package evidence is never modified here.",
+      "produces": "Inputs to engines, graph, and listed token prices.",
+      "must_not": "Be edited as if it were the challenge package."
+    }
+  ],
+  "edges": [
+    {"id": "e-cli-orch", "source": "cli", "target": "orch_port", "label": "run", "kind": "calls"},
+    {"id": "e-cli-http", "source": "cli", "target": "stdlib_http", "label": "serve", "kind": "calls"},
+    {"id": "e-cli-mcp", "source": "cli", "target": "mcp_server", "label": "mcp", "kind": "calls"},
+    {"id": "e-reviewer-console", "source": "reviewer", "target": "console", "label": "opens", "kind": "uses"},
+    {"id": "e-reviewer-status", "source": "reviewer", "target": "status", "label": "records follow-up", "kind": "uses"},
+    {"id": "e-reviewer-ask", "source": "reviewer", "target": "ask", "label": "asks", "kind": "uses"},
+    {"id": "e-host-mcp", "source": "mcp_host", "target": "mcp_server", "label": "JSON-RPC", "kind": "calls"},
+    {"id": "e-http-dispatch", "source": "stdlib_http", "target": "dispatch", "label": "route", "kind": "calls"},
+    {"id": "e-fastapi-dispatch", "source": "fastapi", "target": "dispatch", "label": "route", "kind": "calls"},
+    {"id": "e-dispatch-handlers", "source": "dispatch", "target": "handlers", "label": "/api/*", "kind": "calls"},
+    {"id": "e-dispatch-console", "source": "dispatch", "target": "console", "label": "pages", "kind": "renders"},
+    {"id": "e-dispatch-mcp", "source": "dispatch", "target": "mcp_server", "label": "/mcp", "kind": "calls"},
+    {"id": "e-console-handlers", "source": "console", "target": "handlers", "label": "load pack / review", "kind": "calls"},
+    {"id": "e-handlers-orch", "source": "handlers", "target": "orch_port", "label": "GET workflow", "kind": "calls"},
+    {"id": "e-handlers-audit", "source": "handlers", "target": "audit", "label": "acknowledge / contest / opened", "kind": "calls"},
+    {"id": "e-handlers-writer", "source": "handlers", "target": "evidence_writer", "label": "persist_review", "kind": "persists"},
+    {"id": "e-handlers-ask", "source": "handlers", "target": "ask", "label": "POST /api/ask", "kind": "calls"},
+    {"id": "e-ask-mcp", "source": "ask", "target": "mcp_server", "label": "call_tool", "kind": "calls"},
+    {"id": "e-mcp-handlers", "source": "mcp_server", "target": "handlers", "label": "get_evidence_pack", "kind": "calls"},
+    {"id": "e-mcp-graph", "source": "mcp_server", "target": "graph", "label": "neighbourhood", "kind": "calls"},
+    {"id": "e-orch-stdlib", "source": "orch_port", "target": "stdlib_orch", "label": "assessment", "kind": "calls"},
+    {"id": "e-orch-lg", "source": "orch_port", "target": "langgraph", "label": "advisory/ui/cloud", "kind": "calls"},
+    {"id": "e-lg-stdlib", "source": "langgraph", "target": "stdlib_orch", "label": "advance(step)", "kind": "calls"},
+    {"id": "e-stdlib-steps", "source": "stdlib_orch", "target": "declared_steps", "label": "fixed order", "kind": "uses"},
+    {"id": "e-stdlib-life", "source": "stdlib_orch", "target": "lifecycle", "label": "begin", "kind": "calls"},
+    {"id": "e-stdlib-finops", "source": "stdlib_orch", "target": "finops", "label": "admit / exhaust", "kind": "calls"},
+    {"id": "e-stdlib-graph", "source": "stdlib_orch", "target": "graph", "label": "project_graph", "kind": "calls"},
+    {"id": "e-stdlib-packs", "source": "stdlib_orch", "target": "packs", "label": "package", "kind": "calls"},
+    {"id": "e-stdlib-contracts", "source": "stdlib_orch", "target": "contracts", "label": "validate_emit", "kind": "validates"},
+    {"id": "e-life-authz", "source": "lifecycle", "target": "authz", "label": "authorize", "kind": "calls"},
+    {"id": "e-life-audit", "source": "lifecycle", "target": "audit", "label": "request_start", "kind": "calls"},
+    {"id": "e-authz-config", "source": "authz", "target": "config", "label": "roles / purpose", "kind": "uses"},
+    {"id": "e-packs-privacy", "source": "packs", "target": "privacy", "label": "emission", "kind": "calls"},
+    {"id": "e-packs-batch", "source": "packs", "target": "batch", "label": "batch_pack", "kind": "calls"},
+    {"id": "e-packs-pv", "source": "packs", "target": "pv", "label": "pv_pack", "kind": "calls"},
+    {"id": "e-packs-supply", "source": "packs", "target": "supply", "label": "supply_pack", "kind": "calls"},
+    {"id": "e-packs-advisory", "source": "packs", "target": "advisory", "label": "advisory_pack", "kind": "calls"},
+    {"id": "e-packs-writer", "source": "packs", "target": "evidence_writer", "label": "persist_run", "kind": "persists"},
+    {"id": "e-packs-inference", "source": "packs", "target": "inference_port", "label": "_maybe_annotate", "kind": "calls"},
+    {"id": "e-batch-types", "source": "batch", "target": "types", "label": "constructs", "kind": "classifies"},
+    {"id": "e-pv-types", "source": "pv", "target": "types", "label": "constructs", "kind": "classifies"},
+    {"id": "e-supply-types", "source": "supply", "target": "types", "label": "constructs", "kind": "classifies"},
+    {"id": "e-advisory-types", "source": "advisory", "target": "types", "label": "constructs", "kind": "classifies"},
+    {"id": "e-batch-onto", "source": "batch", "target": "ontology", "label": "units / identity", "kind": "uses"},
+    {"id": "e-pv-onto", "source": "pv", "target": "ontology", "label": "terminology", "kind": "uses"},
+    {"id": "e-graph-onto", "source": "graph", "target": "ontology", "label": "trust gate", "kind": "uses"},
+    {"id": "e-graph-fix", "source": "fixtures", "target": "graph", "label": "RELATIONSHIP_MODEL.csv", "kind": "feeds"},
+    {"id": "e-fix-batch", "source": "fixtures", "target": "batch", "label": "PUB-01/02/03", "kind": "feeds"},
+    {"id": "e-fix-pv", "source": "fixtures", "target": "pv", "label": "PUB-04/05/06", "kind": "feeds"},
+    {"id": "e-fix-supply", "source": "fixtures", "target": "supply", "label": "PUB-07/08", "kind": "feeds"},
+    {"id": "e-port-azure", "source": "inference_port", "target": "azure", "label": "advisory/cloud", "kind": "calls"},
+    {"id": "e-port-null", "source": "inference_port", "target": "null_inf", "label": "assessment / kill", "kind": "calls"},
+    {"id": "e-azure-guards", "source": "azure", "target": "guards", "label": "guard_advice", "kind": "validates"},
+    {"id": "e-azure-writer", "source": "azure", "target": "evidence_writer", "label": "persist_llm", "kind": "persists"},
+    {"id": "e-writer-chain", "source": "evidence_writer", "target": "evidence_chain", "label": "append", "kind": "persists"},
+    {"id": "e-chain-obs", "source": "evidence_chain", "target": "observability", "label": "rollups", "kind": "feeds"},
+    {"id": "e-chain-history", "source": "evidence_chain", "target": "history", "label": "review rows", "kind": "feeds"},
+    {"id": "e-obs-console", "source": "observability", "target": "console", "label": "/health", "kind": "renders"},
+    {"id": "e-history-console", "source": "history", "target": "console", "label": "/history", "kind": "renders"},
+    {"id": "e-status-handlers", "source": "status", "target": "handlers", "label": "POST review", "kind": "calls"},
+    {"id": "e-finops-azure", "source": "finops", "target": "evidence_writer", "label": "price_tokens", "kind": "uses"},
+    {"id": "e-config-port", "source": "config", "target": "inference_port", "label": "inference_allowed", "kind": "gates"}
+  ],
+  "flows": [
+    {
+      "id": "cli-batch",
+      "name": "CLI batch run (assessment)",
+      "description": "Graded path. No network, no model. Engines classify; orchestrator sequences; pack is persisted and printed.",
+      "feature": "FR-001",
+      "mode": "assessment",
+      "steps": [
+        {"id": "cli", "action": "python -m aegis run --workflow batch --id NCB204-B24071"},
+        {"id": "fixtures", "action": "Load PUB-01 (or catalog fixture_for batch)."},
+        {"id": "orch_port", "action": "resolve_orchestrator() → StdlibOrchestrator."},
+        {"id": "stdlib_orch", "action": "begin: interpreter guard, budgets, wallet."},
+        {"id": "lifecycle", "action": "start_request + derive_request_id(as_of)."},
+        {"id": "authz", "action": "authorize purpose and role."},
+        {"id": "audit", "action": "write_audit(request_start)."},
+        {"id": "declared_steps", "action": "Walk admit…validate_emit. Model does not choose."},
+        {"id": "graph", "action": "project_graph from RELATIONSHIP_MODEL.csv."},
+        {"id": "packs", "action": "batch_pack assembles the response."},
+        {"id": "privacy", "action": "evaluate_privacy + apply_emission_controls."},
+        {"id": "batch", "action": "reconcile_batch — source of truth."},
+        {"id": "ontology", "action": "compare_quantities; no unit conversion."},
+        {"id": "types", "action": "Construct Contradiction / Gap / Abstention (MR-5)."},
+        {"id": "contracts", "action": "validate batch_response.schema.json + deny-list."},
+        {"id": "null_inf", "action": "Inference off. Regulated fields unchanged."},
+        {"id": "evidence_writer", "action": "persist_run: request, inputs, pack, decisions, outcome."},
+        {"id": "evidence_chain", "action": "Append out/evidence/chains/<request_id>.jsonl."}
+      ]
+    },
+    {
+      "id": "cli-pv",
+      "name": "CLI PV intake",
+      "description": "Workflow B. Same orchestrator; pv_pack → reconcile_pv. No case coding.",
+      "feature": "FR-002",
+      "mode": "assessment",
+      "steps": [
+        {"id": "cli", "action": "python -m aegis run --workflow pv --id PV-1001"},
+        {"id": "fixtures", "action": "Load PUB-04/05/06 family fixture."},
+        {"id": "orch_port", "action": "StdlibOrchestrator.run"},
+        {"id": "stdlib_orch", "action": "Declared steps; package → pv_pack."},
+        {"id": "packs", "action": "pv_pack + cross_domain_candidates."},
+        {"id": "pv", "action": "reconcile_pv: listedness context, duplicates, clocks."},
+        {"id": "ontology", "action": "retain_coding (MedDRA); language-out-of-scope abstention."},
+        {"id": "types", "action": "Classifications only in domain."},
+        {"id": "contracts", "action": "validate pv_response.schema.json."},
+        {"id": "evidence_writer", "action": "persist_run."},
+        {"id": "evidence_chain", "action": "Chain file for the request."}
+      ]
+    },
+    {
+      "id": "cli-supply",
+      "name": "CLI supply / cold-chain",
+      "description": "Workflow C. Options are draft and unranked. No allocation.",
+      "feature": "FR-003",
+      "mode": "assessment",
+      "steps": [
+        {"id": "cli", "action": "python -m aegis run --workflow supply --id SH-901"},
+        {"id": "fixtures", "action": "Load PUB-07/08 fixture."},
+        {"id": "orch_port", "action": "StdlibOrchestrator.run"},
+        {"id": "packs", "action": "supply_pack."},
+        {"id": "supply", "action": "reconcile_supply: logger contradictions, holds, draft options."},
+        {"id": "graph", "action": "Projection may attach neighbourhood."},
+        {"id": "types", "action": "Gaps / contradictions / abstentions."},
+        {"id": "contracts", "action": "validate supply_response.schema.json."},
+        {"id": "evidence_writer", "action": "persist_run."},
+        {"id": "evidence_chain", "action": "Append-only chain."}
+      ]
+    },
+    {
+      "id": "console-load",
+      "name": "Console loads a pack",
+      "description": "Reviewer opens Batch/PV/Supply. Transport is stdlib or FastAPI; both call dispatch → handle → orchestrator.",
+      "feature": "FR-008",
+      "mode": "ui",
+      "steps": [
+        {"id": "reviewer", "action": "GET /workflows/batch/NCB204-B24071"},
+        {"id": "stdlib_http", "action": "Or FastAPI catch-all."},
+        {"id": "dispatch", "action": "_load_pack as preparer_1 (SoD)."},
+        {"id": "handlers", "action": "GET /api/workflows/batch/{id}."},
+        {"id": "orch_port", "action": "Run fixture → pack."},
+        {"id": "stdlib_orch", "action": "Same declared steps as CLI."},
+        {"id": "packs", "action": "batch_pack / pv_pack / supply_pack."},
+        {"id": "batch", "action": "Engine body (example: batch)."},
+        {"id": "types", "action": "Classifications already on the pack."},
+        {"id": "evidence_writer", "action": "persist_run if this request is new."},
+        {"id": "handlers", "action": "_remember pack in _PACKS."},
+        {"id": "console", "action": "render_pack_body: findings, both contradiction positions, evidence table."}
+      ]
+    },
+    {
+      "id": "hitl-acknowledge",
+      "name": "HITL acknowledge",
+      "description": "Forced evidence view then acknowledge. Server re-checks outstanding critical items and segregation of duties. Not a signature.",
+      "feature": "FR-008",
+      "mode": "ui",
+      "steps": [
+        {"id": "reviewer", "action": "Open each critical evidence link."},
+        {"id": "console", "action": "hx-get /evidence/{id} into #evidence-drawer."},
+        {"id": "dispatch", "action": "HTMX fragment."},
+        {"id": "handlers", "action": "GET /api/evidence/{id}: _OPENED, write_audit(evidence_opened)."},
+        {"id": "audit", "action": "evidence_opened event."},
+        {"id": "evidence_writer", "action": "persist_review(event=evidence_opened)."},
+        {"id": "evidence_chain", "action": "review record appended."},
+        {"id": "status", "action": "Acknowledge control appears only when outstanding_critical is empty."},
+        {"id": "handlers", "action": "POST /api/reviews/{id}/acknowledge. Refuse if preparer==reviewer or items remain."},
+        {"id": "audit", "action": "write_audit(acknowledge) with pack_hash."},
+        {"id": "evidence_writer", "action": "persist_review(kind=reviewer_action, signature=false)."},
+        {"id": "evidence_chain", "action": "Append-only. UI toast: Data saved."}
+      ]
+    },
+    {
+      "id": "hitl-contest",
+      "name": "Store follow-up as evidence",
+      "description": "Contest / action_taken on Status or Contradictions. HTMX keeps the page; toast confirms. Ledger is the chain.",
+      "feature": "FR-008",
+      "mode": "ui",
+      "steps": [
+        {"id": "reviewer", "action": "Write action taken. Click Store follow-up as evidence."},
+        {"id": "status", "action": "hx-post /api/reviews/{id}/contest, panel=status|contradiction."},
+        {"id": "dispatch", "action": "HX-Request → fragment + OOB toast, no navigation."},
+        {"id": "handlers", "action": "write_audit(contest) + _store_response."},
+        {"id": "audit", "action": "contest event, signature=false."},
+        {"id": "evidence_writer", "action": "persist_review(action_taken, subject_id)."},
+        {"id": "evidence_chain", "action": "review record on <request_id>.jsonl."},
+        {"id": "history", "action": "Visible on Evidence history as a decision row."}
+      ]
+    },
+    {
+      "id": "pack-chat",
+      "name": "Pack chat",
+      "description": "Advisory chatbot. Deterministic tool pick, then a labelled restatement. Not a disposition.",
+      "feature": "FR-013",
+      "mode": "ui",
+      "steps": [
+        {"id": "reviewer", "action": "Ask: What is the status of NCB204-B24071?"},
+        {"id": "ask", "action": "POST /api/ask."},
+        {"id": "handlers", "action": "answer_question + record_turn."},
+        {"id": "mcp_server", "action": "Router selects get_evidence_pack from the text."},
+        {"id": "handlers", "action": "GET workflow pack (or cached)."},
+        {"id": "orch_port", "action": "Run if the pack is not loaded."},
+        {"id": "console", "action": "Tool card + model-generated summary labelled not a disposition."}
+      ]
+    },
+    {
+      "id": "mcp-tool",
+      "name": "MCP get_evidence_pack",
+      "description": "External agent (Cursor) reads a pack. Read-only. Same handle() as the console.",
+      "feature": "FR-006",
+      "mode": "advisory",
+      "steps": [
+        {"id": "mcp_host", "action": "Call get_evidence_pack({entity_id: NCB204-B24071})."},
+        {"id": "mcp_server", "action": "handle_rpc → call_tool. tool_is_read_only."},
+        {"id": "handlers", "action": "GET /api/workflows/batch/NCB204-B24071."},
+        {"id": "orch_port", "action": "Produce or reuse the pack."},
+        {"id": "packs", "action": "Engine-assembled pack."},
+        {"id": "mcp_server", "action": "Return _summarize_pack. Advisory only."}
+      ]
+    },
+    {
+      "id": "advisory-annotate",
+      "name": "Azure annotation (advisory)",
+      "description": "FR-013. Model restates an already-computed pack. Guards fail-closed. Tokens and listed cost go on the chain. Regulated arrays stay byte-identical to assessment.",
+      "feature": "FR-013",
+      "mode": "advisory",
+      "steps": [
+        {"id": "config", "action": "AEGIS_RUNTIME_MODE=advisory and AEGIS_LLM_ENABLED=true."},
+        {"id": "orch_port", "action": "LangGraph adapter or stdlib; same steps."},
+        {"id": "langgraph", "action": "Each node is StdlibOrchestrator.advance."},
+        {"id": "stdlib_orch", "action": "package step after domain reconcile."},
+        {"id": "packs", "action": "Pack already has engine classifications."},
+        {"id": "inference_port", "action": "inference_allowed() → Azure adapter."},
+        {"id": "azure", "action": "evidence_brief + generate. Live only if key-auth=dev."},
+        {"id": "guards", "action": "G-1…G-5. Fail-closed."},
+        {"id": "evidence_writer", "action": "persist_llm: tokens, prompt_sha256, listed cost."},
+        {"id": "evidence_chain", "action": "llm + guard records."},
+        {"id": "packs", "action": "Attach human_review.annotations labelled model-generated."}
+      ]
+    },
+    {
+      "id": "kill-switch",
+      "name": "Kill switch / ai_disabled",
+      "description": "Same regulated pack as assessment. InferencePort is NullInference. Console still serves.",
+      "feature": "FR-009",
+      "mode": "ai_disabled",
+      "steps": [
+        {"id": "config", "action": "ai_disabled or AEGIS_LLM_ENABLED=false."},
+        {"id": "inference_port", "action": "inference_allowed() is false."},
+        {"id": "null_inf", "action": "generate → called=false, reason=null."},
+        {"id": "packs", "action": "No annotations. Findings unchanged."},
+        {"id": "contracts", "action": "Same schema and deny-list."},
+        {"id": "evidence_writer", "action": "persist_run without an llm record (or uncalled)."}
+      ]
+    },
+    {
+      "id": "orchestrator-steps",
+      "name": "Nine declared steps",
+      "description": "The only legal control flow. AG roles are declared in agents.yaml. Domain work is inside package, not in plan/retrieve placeholders.",
+      "feature": "FR-006",
+      "mode": "assessment",
+      "steps": [
+        {"id": "declared_steps", "action": "admit — kernel, budgets."},
+        {"id": "finops", "action": "admit_budgets + wallet.admit."},
+        {"id": "lifecycle", "action": "start_request."},
+        {"id": "declared_steps", "action": "plan — AG-1 Supervisor. Pass-through today."},
+        {"id": "declared_steps", "action": "retrieve — AG-2. Pass-through today."},
+        {"id": "graph", "action": "project_graph — AG-2 builds Projection."},
+        {"id": "declared_steps", "action": "reconcile — AG-3/4/5 role; work occurs in package."},
+        {"id": "declared_steps", "action": "annotate — workflow agent; model only if allowed."},
+        {"id": "declared_steps", "action": "approve — AG-1. Optional LangGraph interrupt."},
+        {"id": "packs", "action": "package — AG-6. Domain engines + persist_run."},
+        {"id": "contracts", "action": "validate_emit — kernel."}
+      ]
+    },
+    {
+      "id": "budget-stop",
+      "name": "FinOps budget stop",
+      "description": "If steps, tokens, or tool_calls exhaust, orchestrator emits a partial pack with a domain Abstention and persists it. Not a retry storm.",
+      "feature": "FR-007",
+      "mode": "assessment",
+      "steps": [
+        {"id": "stdlib_orch", "action": "advance increments counters."},
+        {"id": "finops", "action": "exhausted() → steps | tokens | tool_calls."},
+        {"id": "types", "action": "budget_stop_abstention constructed in domain."},
+        {"id": "packs", "action": "_partial_pack."},
+        {"id": "contracts", "action": "Still validate / deny-list."},
+        {"id": "evidence_writer", "action": "persist_run outcome budget_exhausted."},
+        {"id": "evidence_chain", "action": "Chain records the stop."}
+      ]
+    },
+    {
+      "id": "runtime-health",
+      "name": "Runtime health",
+      "description": "In-process telemetry from the evidence chain. Not OpenTelemetry. Listed LLM cost from recorded tokens.",
+      "feature": "FR-007",
+      "mode": "ui",
+      "steps": [
+        {"id": "reviewer", "action": "GET /health or dashboard strip."},
+        {"id": "dispatch", "action": "Route to handle GET /api/health."},
+        {"id": "handlers", "action": "audit_events + in-process sessions."},
+        {"id": "evidence_chain", "action": "Load chains; sum tokens and llm records."},
+        {"id": "finops", "action": "price_tokens for the rollup. Wallet remaining."},
+        {"id": "observability", "action": "runtime_health snapshot."},
+        {"id": "console", "action": "KPI cards, deployments, recent llm, kill switch."}
+      ]
+    },
+    {
+      "id": "evidence-history",
+      "name": "Evidence history ledger",
+      "description": "Read path for reviewer_action records. Complements Status (queue) without becoming a notification panel.",
+      "feature": "FR-014",
+      "mode": "ui",
+      "steps": [
+        {"id": "reviewer", "action": "GET /history."},
+        {"id": "dispatch", "action": "handle GET /api/history."},
+        {"id": "history", "action": "list_review_events over every chain file."},
+        {"id": "evidence_chain", "action": "Filter type=review (not bulk audit dumps)."},
+        {"id": "console", "action": "Table of event, entity, user, action_taken, request, seq."}
+      ]
+    },
+    {
+      "id": "graph-projection",
+      "name": "Graph projection",
+      "description": "Ephemeral in-process graph. Presentation on the pack. Forbidden edges cannot be represented.",
+      "feature": "FR-006",
+      "mode": "assessment",
+      "steps": [
+        {"id": "fixtures", "action": "RELATIONSHIP_MODEL.csv + sibling CSVs."},
+        {"id": "stdlib_orch", "action": "Step project_graph."},
+        {"id": "graph", "action": "build_projection(as_of). Trust + as_of gates."},
+        {"id": "ontology", "action": "can_ground_assertion('trusted')."},
+        {"id": "packs", "action": "Attach human_review.graph_projection."},
+        {"id": "console", "action": "Pack page shows the projection. MCP get_graph_neighbourhood reads it."}
+      ]
+    }
+  ]
+}

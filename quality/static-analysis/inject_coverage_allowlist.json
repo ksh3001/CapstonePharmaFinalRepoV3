@@ -1,0 +1,17 @@
+{
+  "allowed_ids": ["001", "002", "003"],
+  "artefacts": {
+    "001": {
+      "path": "docs/product/business-case.md",
+      "test": "tests/compliance/test_benefit_claims.py"
+    },
+    "002": {
+      "path": "docs/product/success-metrics.md",
+      "test": "tests/compliance/test_metric_conflicts.py"
+    },
+    "003": {
+      "path": "docs/product/no-ai-baseline.md",
+      "test": "tests/compliance/test_no_ai_baseline.py"
+    }
+  }
+}

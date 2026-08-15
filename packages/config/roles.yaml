@@ -1,0 +1,24 @@
+{
+  "spellings": {
+    "qualified_person": "qualified_person",
+    "EU Qualified Person": "qualified_person",
+    "safety_physician": "safety_physician",
+    "Safety Physician": "safety_physician",
+    "supply_governance": "supply_governance",
+    "Supply Governance Board": "supply_governance",
+    "quality_reviewer": "quality_reviewer",
+    "security_privacy": "security_privacy",
+    "CISO / DPO": "security_privacy",
+    "auditor": "auditor",
+    "unblinding_authority": "unblinding_authority"
+  },
+  "labels": {
+    "qualified_person": "EU Qualified Person",
+    "safety_physician": "Safety Physician",
+    "supply_governance": "Supply Governance Board",
+    "quality_reviewer": "Quality reviewer",
+    "security_privacy": "CISO / DPO",
+    "auditor": "Auditor",
+    "unblinding_authority": "Unblinding authority"
+  }
+}

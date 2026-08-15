@@ -1,0 +1,2 @@
+# Optional agentic runtime for advisory/ui/cloud. Assessment does not install this.
+langgraph>=0.2

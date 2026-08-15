@@ -1,0 +1,8 @@
+<section class="region" data-region="evidence-detail">
+  <h2>Evidence {{ item.record_id }}</h2>
+  <p>source={{ item.source }}</p>
+  <p>authority={{ item.authority }}</p>
+  <p>effective_at={{ item.effective_at }}</p>
+  <p>retrieved_at={{ item.retrieved_at }}</p>
+  <p>hash={{ (item.integrity or {}).sha256 }}</p>
+</section>

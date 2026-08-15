@@ -1,0 +1,64 @@
+{
+  "agents": {
+    "AG-1": {
+      "name": "Supervisor",
+      "inference": false,
+      "max_steps": 9,
+      "max_tokens": 0,
+      "tools": [],
+      "interrupts": ["approve"],
+      "model_risk_class": "none",
+      "steps": ["plan", "approve"]
+    },
+    "AG-2": {
+      "name": "Evidence retrieval",
+      "inference": false,
+      "max_steps": 4,
+      "max_tokens": 0,
+      "tools": ["source_adapter"],
+      "interrupts": [],
+      "model_risk_class": "none",
+      "steps": ["retrieve", "project_graph"]
+    },
+    "AG-3": {
+      "name": "Batch reconciliation",
+      "inference": true,
+      "max_steps": 4,
+      "max_tokens": 8000,
+      "tools": ["graph", "ontology"],
+      "interrupts": ["acknowledge"],
+      "model_risk_class": "annotations_only",
+      "steps": ["reconcile", "annotate"]
+    },
+    "AG-4": {
+      "name": "PV intake",
+      "inference": true,
+      "max_steps": 4,
+      "max_tokens": 8000,
+      "tools": ["ontology", "terminology"],
+      "interrupts": ["safety_physician"],
+      "model_risk_class": "annotations_only",
+      "steps": ["reconcile", "annotate"]
+    },
+    "AG-5": {
+      "name": "Supply options",
+      "inference": true,
+      "max_steps": 4,
+      "max_tokens": 8000,
+      "tools": ["graph"],
+      "interrupts": ["approval_path"],
+      "model_risk_class": "annotations_only",
+      "steps": ["reconcile", "annotate"]
+    },
+    "AG-6": {
+      "name": "Review packager",
+      "inference": false,
+      "max_steps": 2,
+      "max_tokens": 0,
+      "tools": [],
+      "interrupts": ["acknowledge"],
+      "model_risk_class": "none",
+      "steps": ["package"]
+    }
+  }
+}
