@@ -36,7 +36,10 @@ class FastAPIConsoleTests(unittest.TestCase):
         self.assertEqual(page.status_code, 200)
         lowered = page.text.casefold()
         self.assertIn("ncb204-b24071", lowered)
-        self.assertIn("hx-get=", page.text)
+        self.assertTrue(
+            "hx-get=" in page.text or "hx-post=" in page.text,
+            "batch pack must include an HTMX hook",
+        )
         self.assertIn("not_executed", lowered)
         self.assertTrue(
             "remaining critical evidence" in lowered or 'class="ack"' in page.text,
