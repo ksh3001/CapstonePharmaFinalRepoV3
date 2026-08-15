@@ -1,5 +1,7 @@
 # Intended use
 
+**Question this file answers:** what the product is for, who may use it, and what it must never decide.
+
 AEGIS is an advisory, human-in-the-loop evidence console for three workflows: batch evidence, PV intake, and supply / cold-chain. Deterministic engines assemble a reviewable pack. A qualified human decides outside this system.
 
 ## Who it is for

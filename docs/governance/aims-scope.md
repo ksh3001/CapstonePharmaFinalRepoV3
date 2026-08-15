@@ -1,5 +1,7 @@
 # AIMS scope (ISO/IEC 42001 clause 4)
 
+**Question this file answers:** what the in-repo AI management system covers, and who the interested parties are.
+
 This document scopes the AI management system **for this repository**. It is not an ISO/IEC 42001 certificate and not a claim that a certified AIMS is in operation.
 
 ## Context

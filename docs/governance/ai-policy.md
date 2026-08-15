@@ -1,5 +1,7 @@
 # AI policy (ISO/IEC 42001 clause 5)
 
+**Question this file answers:** what leadership rule binds every AI-assisted and deterministic path in this build.
+
 Deterministic-first. No transfer of Decide authority.
 
 ## Policy statements
