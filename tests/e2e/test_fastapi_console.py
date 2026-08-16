@@ -24,7 +24,10 @@ class FastAPIConsoleTests(unittest.TestCase):
         self.client = TestClient(create_app())
 
     def test_home_and_batch_are_html(self) -> None:
-        home = self.client.get("/")
+        landing = self.client.get("/")
+        self.assertEqual(landing.status_code, 200)
+        self.assertIn("Sign in", landing.text)
+        home = self.client.get("/home")
         self.assertEqual(home.status_code, 200)
         self.assertIn("text/html", home.headers["content-type"])
         self.assertIn("/workflows/batch", home.text)
@@ -53,10 +56,15 @@ class FastAPIConsoleTests(unittest.TestCase):
         self.assertEqual(response.json()["execution_status"], "not_executed")
 
     def test_session_cookie_is_set_for_fixture_user(self) -> None:
-        response = self.client.post("/session", data={"user": "qp_eu_1", "next": "/"}, follow_redirects=False)
+        response = self.client.post(
+            "/session",
+            data={"user": "qp_eu_1", "password": "aegis-demo", "next": "/"},
+            follow_redirects=False,
+        )
         self.assertEqual(response.status_code, 303)
+        self.assertEqual(response.headers.get("location"), "/home")
         self.assertIn("aegis_user=qp_eu_1", response.headers.get("set-cookie", ""))
-        home = self.client.get("/")
+        home = self.client.get("/home")
         self.assertIn("qp_eu_1", home.text)
         self.assertIn("EU Qualified Person", home.text)
 

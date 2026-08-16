@@ -15,7 +15,7 @@ class HtmxConsoleTests(unittest.TestCase):
         reset_server_state()
 
     def test_pages_load_htmx_and_use_partials(self) -> None:
-        home = dispatch("GET", "/")
+        home = dispatch("GET", "/home")
         self.assertIn("/static/htmx.min.js", home["body"])
         self.assertIn('hx-post="/api/ask"', home["body"])
         page = dispatch("GET", "/workflows/batch")

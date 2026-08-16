@@ -13,6 +13,7 @@ from typing import Any
 from urllib.parse import parse_qs, unquote, urlparse
 
 from packages.config.catalog import TITLES, board_entities, defaults, search_href
+from packages.config.demo_auth import verify_demo_password
 from packages.config.identities import default_console_user, resolve_identity
 from packages.config.runtime import llm_enabled, runtime_mode
 from services.api.chrome import bind_identity
@@ -30,6 +31,7 @@ from services.api.console import (
     render_home,
     render_injects_page,
     render_list_page,
+    render_login,
     render_message,
     render_pack_page,
     render_saved_toast,
@@ -149,14 +151,25 @@ def dispatch(
 
     if method == "POST" and path == "/session":
         wanted = str(body.get("user") or "").strip()
+        password = str(body.get("password") or "")
         ident = resolve_identity(wanted)
-        next_href = _safe_next(str(body.get("next") or "/"))
+        next_href = _safe_next(str(body.get("next") or "/home"))
+        if next_href in {"/", "/index.html", "/login"}:
+            next_href = "/home"
         if ident is None or not ident.assumable:
             return _html(
                 400,
-                render_message(
-                    "Identity refused",
-                    "That identity is not in the entitlement table or is not assumable.",
+                render_login(
+                    next_href=next_href,
+                    notice="That identity is not in the entitlement table or is not assumable.",
+                ),
+            )
+        if not verify_demo_password(ident.user, password):
+            return _html(
+                401,
+                render_login(
+                    next_href=next_href,
+                    notice="Username or password is incorrect.",
                 ),
             )
         return {
@@ -207,7 +220,13 @@ def dispatch(
             "payload": {"mode": runtime_mode(), "llm": "on" if llm_enabled() else "off"},
         }
 
-    if method == "GET" and path in {"/", "/index.html"}:
+    if method == "GET" and path in {"/login", "/", "/index.html"}:
+        next_href = _safe_next(_query_first(query, "next") or "/home")
+        if next_href in {"/", "/index.html", "/login"}:
+            next_href = "/home"
+        return _html(200, render_login(next_href=next_href))
+
+    if method == "GET" and path == "/home":
         packs = _demo_packs()
         use_jinja = renderer == "jinja" and jinja_available()
         if use_jinja:
@@ -335,7 +354,7 @@ def _html_error(response: dict[str, Any]) -> dict[str, Any]:
     payload = response.get("payload") or {}
     error = payload.get("error") or {}
     message = str(error.get("message") or "Request failed")
-    extra = f'<p><a href="/">Home</a></p>'
+    extra = f'<p><a href="/home">Home</a></p>'
     return _html(int(response.get("status") or 400), render_message("Request declined", message, extra=extra))
 
 

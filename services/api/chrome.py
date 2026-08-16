@@ -8,7 +8,6 @@ from html import escape
 from packages.config.identities import (
     SessionIdentity,
     default_console_user,
-    fixture_identities,
     resolve_identity,
     unresolved_identity,
 )
@@ -42,7 +41,7 @@ def icon(name: str) -> str:
 
 def sidebar() -> str:
     primary = (
-        ("/", "home", "Dashboard"),
+        ("/home", "home", "Dashboard"),
         ("/workflows/batch", "batch", "Batch"),
         ("/workflows/pv", "pv", "PV intake"),
         ("/workflows/supply", "supply", "Supply"),
@@ -66,7 +65,7 @@ def sidebar() -> str:
     )
     return (
         '<aside class="sidebar" id="app-nav" aria-label="AEGIS">'
-        f'<a class="side-brand" href="/">{icon("batch")}<span>AEGIS</span></a>'
+        f'<a class="side-brand" href="/home">{icon("batch")}<span>AEGIS</span></a>'
         f'<nav class="side-primary" aria-label="Review">{primary_links}</nav>'
         '<p class="side-heading">Oversight</p>'
         f'<nav class="side-oversight" aria-label="Oversight">{oversight_links}</nav>'
@@ -96,31 +95,15 @@ def current_identity() -> SessionIdentity:
 
 def user_cluster_html() -> str:
     current = current_identity()
-    options = []
-    for item in fixture_identities():
-        selected = " selected" if item.user == current.user else ""
-        disabled = " disabled" if not item.assumable else ""
-        label = f"{item.user} · {item.display_role}"
-        if not item.assumable:
-            label += " (not assumable)"
-        options.append(
-            f'<option value="{escape(item.user)}"{selected}{disabled}>{escape(label)}</option>'
-        )
-    picker = (
-        '<form class="identity-picker" method="post" action="/session">'
-        '<input type="hidden" name="next" id="identity-next" value="/"/>'
-        '<label class="sr-only" for="session-user">Assume identity</label>'
-        f'<select id="session-user" name="user" onchange="this.form.submit()">{"".join(options)}</select>'
-        "</form>"
-    )
     return (
-        picker
-        + '<div class="user-chip">'
+        '<div class="user-chip">'
         f'<span class="avatar">{escape(current.initials)}</span>'
         '<span class="user-meta">'
         f'<span class="user-name">{escape(current.user)}</span>'
         f'<span class="user-role">{escape(current.display_role)}</span>'
-        "</span></div>"
+        "</span>"
+        '<a class="login-link" href="/">Switch</a>'
+        "</div>"
     )
 
 
@@ -136,10 +119,11 @@ def topbar() -> str:
         '<label class="sr-only" for="q">Search pack id</label>'
         '<input id="q" name="q" type="search" placeholder="Search batch, case or event id"/>'
         "</form>"
-        '<a class="top-logo" href="/">'
+        '<a class="top-logo" href="/home">'
         '<span class="logo-ring"></span><strong>AEGIS</strong>'
         "</a>"
         '<div class="top-right">'
+        f'<a class="login-link" href="/">Demo sign-in</a>'
         f'<a class="icon-btn" href="/status" title="Status">{icon("bell")}</a>'
         + user_cluster_html()
         + "</div>"

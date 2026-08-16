@@ -1,14 +1,14 @@
 {% extends "base.html" %}
 {% block body %}
 <div class="page-title"><h1>Dashboard</h1></div>
-<p class="lede">Runtime mode <strong>{{ mode }}</strong>. Model {{ llm_label }}. The engines produce the pack. This console is how a reviewer sees it, opens evidence, and records a follow-up. Use <strong>Pack chat</strong> for a catalog id.</p>
+<p class="lede">Runtime mode <strong>{{ mode }}</strong>. Model {{ llm_label }}. The engines produce the pack. This console is how a reviewer sees it, opens evidence, and records a follow-up. Start from <a href="/">demo sign-in</a> to assume a fixture identity, or use <strong>Pack chat</strong> for a catalog id.</p>
 {{ health_html|safe }}
 {{ dashboard_html|safe }}
 {{ directory_html|safe }}
 <div class="hero-grid">
+  <a class="card" href="/"><h2>Demo sign-in</h2><p>Assume a fixture user from the entitlement table before the walkthrough.</p></a>
   <a class="card" href="/status"><h2>Workflow status</h2><p>See review progress and store the action taken as evidence.</p></a>
   <a class="card" href="/history"><h2>Evidence history</h2><p>Read the append-only chain of reviewer actions.</p></a>
-  <a class="card" href="/health"><h2>Runtime health</h2><p>Mode, tokens, listed LLM cost, denials, and the kill switch.</p></a>
 </div>
 <h2>How to review</h2>
 <ol class="how-list">

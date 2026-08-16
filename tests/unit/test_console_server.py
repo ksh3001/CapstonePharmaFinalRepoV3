@@ -15,7 +15,7 @@ class ConsoleServerTests(unittest.TestCase):
         reset_server_state()
 
     def test_home_and_batch_html(self) -> None:
-        home = dispatch("GET", "/")
+        home = dispatch("GET", "/home")
         self.assertEqual(home["status"], 200)
         self.assertIn("text/html", home["headers"]["content-type"])
         self.assertIn("/workflows/batch", home["body"])
@@ -110,7 +110,7 @@ class ConsoleServerTests(unittest.TestCase):
         self.assertEqual(ledger["payload"]["store"], "evidence_chain")
         events = ledger["payload"]["events"]
         self.assertTrue(any(item.get("event") == "contest" and "CMO commitment" in str(item.get("action_taken") or "") for item in events))
-        home = dispatch("GET", "/")
+        home = dispatch("GET", "/home")
         self.assertIn("/history", home["body"])
 
     def test_contradictions_board_records_per_item_follow_up(self) -> None:
@@ -210,7 +210,7 @@ class ConsoleServerTests(unittest.TestCase):
         self.assertIn("Supervisor", page["body"])
         self.assertIn("AG-6", page["body"])
         self.assertIn("They do not decide", page["body"])
-        home = dispatch("GET", "/")
+        home = dispatch("GET", "/home")
         self.assertIn("/agents", home["body"])
 
     def test_health_page_is_in_process_not_otel(self) -> None:
@@ -229,7 +229,7 @@ class ConsoleServerTests(unittest.TestCase):
         self.assertNotIn("estimated cost", page["body"].casefold())
         self.assertNotIn("assumed cost", page["body"].casefold())
         self.assertIn("/api/health", page["body"])
-        home = dispatch("GET", "/")
+        home = dispatch("GET", "/home")
         self.assertIn("/health", home["body"])
         self.assertIn("Runtime health", home["body"])
         payload = dispatch("GET", "/api/health")
@@ -251,7 +251,7 @@ class ConsoleServerTests(unittest.TestCase):
         self.assertIn(".health-stack", sheet)
 
     def test_home_and_modules_list_every_selectable_id(self) -> None:
-        home = dispatch("GET", "/")
+        home = dispatch("GET", "/home")
         for entity_id in (
             "NCB204-B24071",
             "NCS310-S26033",
@@ -342,7 +342,7 @@ class ConsoleServerTests(unittest.TestCase):
         self.assertNotIn("Store comment as evidence", pack["body"])
 
     def test_ask_box_returns_engine_status_for_batch_id(self) -> None:
-        home = dispatch("GET", "/")
+        home = dispatch("GET", "/home")
         self.assertIn("Pack chat", home["body"])
         self.assertIn('hx-post="/api/ask"', home["body"])
         self.assertIn('hx-target="#engine-thread"', home["body"])

@@ -29,7 +29,7 @@ FOCUS_CSS = (
 PAGE_CSS = f".region{{display:block}} {FOCUS_CSS}"
 NAV = (
     '<nav class="aegis" aria-label="AEGIS">'
-    '<a href="/">Home</a>'
+    '<a href="/home">Home</a>'
     '<a href="/workflows/batch">Batch</a>'
     '<a href="/workflows/pv">PV</a>'
     '<a href="/workflows/supply">Supply</a>'
@@ -339,6 +339,48 @@ def render_health_strip(snapshot: dict[str, Any]) -> str:
     )
 
 
+def render_login(*, next_href: str = "/home", notice: str = "") -> str:
+    """Username/password gate. Posts to /session; lands on /home for qp_eu_1."""
+    safe_next = next_href if next_href.startswith("/") and not next_href.startswith("//") else "/home"
+    if safe_next in {"/", "/index.html", "/login"}:
+        safe_next = "/home"
+    notice_html = f'<p class="login-notice" role="status">{escape(notice)}</p>' if notice else ""
+    body = (
+        '<main class="login-shell">'
+        '<section class="login-panel" aria-labelledby="login-title">'
+        '<p class="login-brand"><span class="logo-ring"></span><strong>AEGIS</strong></p>'
+        '<h1 id="login-title">Sign in</h1>'
+        '<p class="lede">Enter your username and password to open the console.</p>'
+        + notice_html
+        + f'<form class="login-form" method="post" action="/session" autocomplete="on">'
+        f'<input type="hidden" name="next" value="{escape(safe_next)}"/>'
+        '<div class="login-field">'
+        '<label for="login-user">Username</label>'
+        '<input id="login-user" name="user" type="text" autocomplete="username" '
+        'required spellcheck="false" autofocus value="qp_eu_1"/>'
+        "</div>"
+        '<div class="login-field">'
+        '<label for="login-password">Password</label>'
+        '<input id="login-password" name="password" type="password" '
+        'autocomplete="current-password" required/>'
+        "</div>"
+        '<button type="submit">Log in</button>'
+        "</form>"
+        "</section>"
+        "</main>"
+    )
+    return (
+        "<!DOCTYPE html><html lang=\"en\" dir=\"ltr\"><head>"
+        '<meta charset="utf-8"/>'
+        '<meta name="viewport" content="width=device-width, initial-scale=1"/>'
+        "<title>AEGIS sign-in</title>"
+        '<link rel="stylesheet" href="/static/aegis.css"/>'
+        "</head><body class=\"login-body\">"
+        + body
+        + "</body></html>"
+    )
+
+
 def render_home(*, mode: str, llm: bool, packs: list[dict[str, Any]] | None = None) -> str:
     llm_label = "on" if llm else "off"
     dashboard = render_home_dashboard(list(packs or [])) if packs else home_map()
@@ -346,14 +388,14 @@ def render_home(*, mode: str, llm: bool, packs: list[dict[str, Any]] | None = No
         '<div class="page-title"><h1>Dashboard</h1></div>'
         f'<p class="lede">Runtime mode <strong>{escape(mode)}</strong>. Model {escape(llm_label)}. '
         "The engines produce the pack. This console is how a reviewer sees it, opens evidence, and records a follow-up. "
-        "Use <strong>Pack chat</strong> for a catalog id.</p>"
+        'Start from <a href="/">demo sign-in</a> to assume a fixture identity, or use <strong>Pack chat</strong> for a catalog id.</p>'
         + dashboard_health_html(session_count=len(packs or []))
         + dashboard
         + render_entity_directory()
         + '<div class="hero-grid">'
+        '<a class="card" href="/"><h2>Demo sign-in</h2><p>Assume a fixture user from the entitlement table before the walkthrough.</p></a>'
         '<a class="card" href="/status"><h2>Workflow status</h2><p>See review progress and store the action taken as evidence.</p></a>'
         '<a class="card" href="/history"><h2>Evidence history</h2><p>Read the append-only chain of reviewer actions.</p></a>'
-        '<a class="card" href="/health"><h2>Runtime health</h2><p>Mode, tokens, listed LLM cost, denials, and the kill switch.</p></a>'
         "</div>"
         '<h2>How to review</h2>'
         '<ol class="how-list">'
