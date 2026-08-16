@@ -345,10 +345,50 @@ def render_login(*, next_href: str = "/home", notice: str = "") -> str:
     if safe_next in {"/", "/index.html", "/login"}:
         safe_next = "/home"
     notice_html = f'<p class="login-notice" role="status">{escape(notice)}</p>' if notice else ""
+    # Critical layout is inlined so a stale /static/aegis.css cache cannot break Azure.
+    critical_css = """
+html,body{height:100%;margin:0}
+body.login-body{
+  min-height:100vh;margin:0;overflow-x:hidden;
+  background:radial-gradient(ellipse 80% 50% at 10% 0%,rgba(111,66,193,.18),transparent 55%),
+    radial-gradient(ellipse 60% 40% at 90% 100%,rgba(255,122,69,.14),transparent 50%),#f3f4f8;
+  color:#2c3344;font-family:"Segoe UI","Helvetica Neue",Arial,sans-serif;font-size:14px;line-height:1.45
+}
+.login-shell{
+  box-sizing:border-box;min-height:100vh;width:100%;margin:0;padding:1.5rem;
+  display:flex;align-items:center;justify-content:center
+}
+.login-panel{
+  box-sizing:border-box;width:100%;max-width:22rem;margin:0 auto;
+  background:#fff;border:1px solid #e6e8ee;border-radius:14px;
+  box-shadow:0 8px 24px rgba(44,51,68,.06);padding:2rem 1.75rem 1.75rem;text-align:left
+}
+.login-brand{display:flex;align-items:center;gap:.55rem;margin:0 0 1.25rem;font-size:.95rem;letter-spacing:.08em}
+.login-brand .logo-ring{
+  flex:0 0 22px;width:22px;height:22px;border-radius:50%;
+  background:conic-gradient(#6f42c1,#ff7a45,#4da6ff,#6f42c1);box-shadow:inset 0 0 0 5px #fff
+}
+.login-panel h1{margin:0 0 .4rem;font-size:1.45rem;font-weight:600}
+.login-panel .lede{margin:0 0 1.35rem;max-width:none;color:#7b8494}
+.login-notice{margin:0 0 1rem;padding:.65rem .75rem;border-radius:8px;background:#fff4f0;color:#8a3b1d;border:1px solid #f0c9b8}
+.login-form{display:flex;flex-direction:column;gap:1rem;margin:0;width:100%}
+.login-field{display:flex;flex-direction:column;gap:.4rem;width:100%;margin:0}
+.login-field label{display:block;margin:0;font-size:.82rem;font-weight:600;color:#2c3344}
+.login-form input[type=text],.login-form input[type=password]{
+  box-sizing:border-box;display:block;width:100%;max-width:100%;margin:0;
+  padding:.75rem .85rem;border:1px solid #e6e8ee;border-radius:8px;font:inherit;font-size:.95rem;
+  background:#fff;color:#2c3344;min-height:44px
+}
+.login-form button{
+  box-sizing:border-box;display:block;width:100%;margin:.25rem 0 0;border:0;border-radius:8px;
+  background:#6f42c1;color:#fff;font:inherit;font-weight:600;font-size:.95rem;padding:.8rem 1rem;
+  min-height:44px;cursor:pointer
+}
+""".replace("\n", "")
     body = (
         '<main class="login-shell">'
         '<section class="login-panel" aria-labelledby="login-title">'
-        '<p class="login-brand"><span class="logo-ring"></span><strong>AEGIS</strong></p>'
+        '<p class="login-brand"><span class="logo-ring" aria-hidden="true"></span><strong>AEGIS</strong></p>'
         '<h1 id="login-title">Sign in</h1>'
         '<p class="lede">Enter your username and password to open the console.</p>'
         + notice_html
@@ -374,7 +414,8 @@ def render_login(*, next_href: str = "/home", notice: str = "") -> str:
         '<meta charset="utf-8"/>'
         '<meta name="viewport" content="width=device-width, initial-scale=1"/>'
         "<title>AEGIS sign-in</title>"
-        '<link rel="stylesheet" href="/static/aegis.css"/>'
+        f"<style>{critical_css}</style>"
+        '<link rel="stylesheet" href="/static/aegis.css?v=login2"/>'
         "</head><body class=\"login-body\">"
         + body
         + "</body></html>"

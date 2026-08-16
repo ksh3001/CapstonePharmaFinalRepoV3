@@ -35,6 +35,8 @@ class SessionIdentityTests(unittest.TestCase):
             self.assertIn(">Log in<", body)
             self.assertIn('action="/session"', body)
             self.assertIn('name="next" value="/home"', body)
+            self.assertIn("login-panel", body)
+            self.assertIn("<style>", body)
             self.assertNotIn("Entitlement roster", body)
             self.assertNotIn("Demo credentials", body)
 
