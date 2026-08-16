@@ -26,10 +26,14 @@ Do not put API keys in the repository. Optional Azure OpenAI names (`AZURE_OPENA
 
 ## Troubleshooting: Internal Server Error
 
-1. Portal → Web App → **Configuration** → **General settings** → **Startup Command** → set to:
-   `python -m uvicorn app:app --host 0.0.0.0 --port 8000` → Save → restart.
-2. Confirm Application settings: `SCM_DO_BUILD_DURING_DEPLOYMENT=true`, `WEBSITES_PORT=8000`, `AEGIS_RUNTIME_MODE=ui`, `AEGIS_LLM_ENABLED=false`.
-3. Portal → **Log stream** (or Deployment Center logs). Look for Oryx pip failures or `ModuleNotFoundError: fastapi` / `uvicorn`.
+If Log stream says `App Command Line not configured` and then `Detected an app based on Flask` / `Generating gunicorn command for 'app:app'` with worker `sync`, Azure is treating FastAPI as WSGI. That yields:
+
+`TypeError: FastAPI.__call__() missing 1 required positional argument: 'send'`
+
+1. Portal → Web App → **Configuration** → **General settings** → **Startup Command** → set exactly:
+   `python -m uvicorn app:app --host 0.0.0.0 --port 8000`
+2. **Save**, then **Restart**. Log stream must show uvicorn (or gunicorn with `uvicorn.workers.UvicornWorker`), not `Using worker: sync`.
+3. Confirm Application settings: `SCM_DO_BUILD_DURING_DEPLOYMENT=true`, `WEBSITES_PORT=8000`, `AEGIS_RUNTIME_MODE=ui`, `AEGIS_LLM_ENABLED=false`.
 4. Hit `https://<app>.azurewebsites.net/healthz` — expect JSON `{"mode":"ui","llm":"off"}`.
 
 ## 2. Connect GitHub Actions
