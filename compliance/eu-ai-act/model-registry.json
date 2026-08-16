@@ -1,0 +1,6 @@
+{
+  "purpose": "Pinned advisory-annotation models only. Floating aliases are forbidden.",
+  "pinned_versions": ["gpt-4.1"],
+  "pinned_deployments": ["gpt-4.1"],
+  "forbidden_aliases": ["latest", "current", "alias"]
+}

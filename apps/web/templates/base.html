@@ -11,29 +11,18 @@
 <input id="nav-toggle" class="nav-toggle" type="checkbox"/>
 <label class="nav-scrim" for="nav-toggle"><span class="sr-only">Close navigation</span></label>
 <input id="chat-toggle" class="chat-toggle" type="checkbox"/>
+{{ guide_toggle_html|safe }}
 <div class="app">
 {{ sidebar_html|safe }}
 <div class="app-frame">
-<header class="topbar">
-  <label class="top-menu" for="nav-toggle">
-    <span class="sr-only">Open or close navigation</span>
-  </label>
-  <form class="top-search" method="get" action="/search" role="search">
-    <label class="sr-only" for="q">Search pack id</label>
-    <input id="q" name="q" type="search" placeholder="Search batch, case or event id"/>
-  </form>
-  <a class="top-logo" href="/"><span class="logo-ring"></span><strong>AEGIS</strong></a>
-  <div class="top-right">
-    <a class="icon-btn" href="/status" title="Status">Status</a>
-    {{ user_cluster_html|safe }}
-  </div>
-</header>
+{{ topbar_html|safe }}
 <main class="canvas">
 {% block body %}{% endblock %}
 </main>
 </div>
 </div>
 {{ chat_html|safe }}
+{{ guide_html|safe }}
 <div id="aegis-toast" class="toast" role="status" aria-live="polite" hidden></div>
 <script>var n=document.getElementById("identity-next");if(n)n.value=location.pathname+location.search;</script>
 </body>

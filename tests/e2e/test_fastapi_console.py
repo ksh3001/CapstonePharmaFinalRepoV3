@@ -32,6 +32,8 @@ class FastAPIConsoleTests(unittest.TestCase):
         self.assertIn("Runtime health", home.text)
         self.assertIn("health-strip", home.text)
         self.assertIn("Open full telemetry", home.text)
+        self.assertIn("User guide", home.text)
+        self.assertIn('id="user-guide"', home.text)
         page = self.client.get("/workflows/batch/NCB204-B24071")
         self.assertEqual(page.status_code, 200)
         lowered = page.text.casefold()
