@@ -18,9 +18,19 @@ Or in the Azure Portal: create a **Web App**, Linux, **Python 3.12**, plan **B1*
 | `WEBSITES_PORT` | `8000` |
 | `AEGIS_RUNTIME_MODE` | `ui` |
 | `AEGIS_LLM_ENABLED` | `false` |
-| Startup command | `bash deploy/containers/startup.sh` |
+| Startup command | `python -m uvicorn app:app --host 0.0.0.0 --port 8000` |
+
+(`bash deploy/containers/startup.sh` also works if the script is LF-only; the uvicorn one-liner avoids bash line-ending issues.)
 
 Do not put API keys in the repository. Optional Azure OpenAI names (`AZURE_OPENAI_*`) go in App Service configuration only, and only if you switch the mode to `advisory` and set `AEGIS_LLM_ENABLED=true`.
+
+## Troubleshooting: Internal Server Error
+
+1. Portal → Web App → **Configuration** → **General settings** → **Startup Command** → set to:
+   `python -m uvicorn app:app --host 0.0.0.0 --port 8000` → Save → restart.
+2. Confirm Application settings: `SCM_DO_BUILD_DURING_DEPLOYMENT=true`, `WEBSITES_PORT=8000`, `AEGIS_RUNTIME_MODE=ui`, `AEGIS_LLM_ENABLED=false`.
+3. Portal → **Log stream** (or Deployment Center logs). Look for Oryx pip failures or `ModuleNotFoundError: fastapi` / `uvicorn`.
+4. Hit `https://<app>.azurewebsites.net/healthz` — expect JSON `{"mode":"ui","llm":"off"}`.
 
 ## 2. Connect GitHub Actions
 
