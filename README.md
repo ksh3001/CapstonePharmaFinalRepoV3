@@ -149,6 +149,7 @@ One question per file. Specs in `specs/` win if a doc and a spec disagree.
 |---|---|
 | `docs/README.md` | Documentation register — start here |
 | `docs/product/intended-use.md` | What the product does and must never decide |
+| [One-page brief (PPT)](docs/product/aegis-one-pager-infographic.pptx) | Infographic: injects, tests, roles, agents |
 | `docs/architecture/overview.md` | Where code belongs |
 | [C4 architecture (HTML)](docs/architecture/aegis-architecture.html) | Interactive system diagram |
 | `docs/engineering/developer-guide.md` | How to change the repo without breaking a gate |

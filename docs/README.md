@@ -9,6 +9,7 @@ If two files disagree, the **spec** wins (`specs/`). The master plan holds ratio
 | Layer | Question | Start here |
 |---|---|---|
 | Product | What problem, for whom, what must never be decided | `product/intended-use.md`, `../specs/product/scope.md` |
+| One-pager | Defence / intro slide (infographic) | `product/aegis-one-pager-infographic.pptx` |
 | Architecture | Where code belongs | `architecture/overview.md`, `architecture/aegis-architecture.html` |
 | ADR | Why a durable choice was made | `adr/` |
 | Engineering | How to change the code without breaking gates | `engineering/developer-guide.md` |
