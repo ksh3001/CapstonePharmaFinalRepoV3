@@ -14,6 +14,24 @@ class ConsoleServerTests(unittest.TestCase):
         reset_api_state()
         reset_server_state()
 
+    def test_user_guide_opens_from_header(self) -> None:
+        home = dispatch("GET", "/")
+        self.assertIn('id="guide-toggle"', home["body"])
+        self.assertIn('id="user-guide"', home["body"])
+        self.assertIn("User guide", home["body"])
+        self.assertIn('for="guide-toggle"', home["body"])
+        self.assertIn("Batch evidence", home["body"])
+        self.assertIn("PV intake", home["body"])
+        self.assertIn("Supply / cold-chain", home["body"])
+        self.assertIn("Pack chat", home["body"])
+        self.assertIn("guide-shot", home["body"])
+        self.assertIn("/static/guide/home.jpg", home["body"])
+        self.assertIn("/static/guide/workflows-batch.jpg", home["body"])
+        self.assertIn("<img ", home["body"])
+        start = home["body"].find('id="user-guide"')
+        self.assertGreaterEqual(start, 0)
+        self.assertNotIn("allocate", home["body"][start:].casefold())
+
     def test_home_and_batch_html(self) -> None:
         home = dispatch("GET", "/home")
         self.assertEqual(home["status"], 200)

@@ -28,6 +28,11 @@ ICONS = {
     "bell": '<path d="M6 16h12l-1.2-2.2V10a4.8 4.8 0 1 0-9.6 0v3.8L6 16z"/><path d="M10 16a2 2 0 0 0 4 0"/>',
     "chat": '<path d="M5 6h14v10H9l-4 3V6z"/>',
     "menu": '<path d="M5 7h14M5 12h14M5 17h14"/>',
+    "guide": (
+        '<circle cx="12" cy="12" r="8"/>'
+        '<path d="M9.6 9.6a2.5 2.5 0 1 1 3.4 2.3c-.8.4-1.2 1-1.2 1.8V14.2"/>'
+        '<circle cx="12" cy="17" r="0.7" fill="currentColor" stroke="none"/>'
+    ),
 }
 
 
@@ -107,6 +112,12 @@ def user_cluster_html() -> str:
     )
 
 
+def _guide_button() -> str:
+    from services.api.guide import guide_button
+
+    return guide_button()
+
+
 def topbar() -> str:
     return (
         '<header class="topbar">'
@@ -123,8 +134,9 @@ def topbar() -> str:
         '<span class="logo-ring"></span><strong>AEGIS</strong>'
         "</a>"
         '<div class="top-right">'
-        f'<a class="login-link" href="/">Demo sign-in</a>'
-        f'<a class="icon-btn" href="/status" title="Status">{icon("bell")}</a>'
+        + '<a class="login-link" href="/">Demo sign-in</a>'
+        + _guide_button()
+        + f'<a class="icon-btn" href="/status" title="Status">{icon("bell")}</a>'
         + user_cluster_html()
         + "</div>"
         "</header>"
@@ -135,6 +147,18 @@ def _chat_panel() -> str:
     from services.api.console import render_ask_panel
 
     return render_ask_panel()
+
+
+def _guide_toggle() -> str:
+    from services.api.guide import guide_toggle
+
+    return guide_toggle()
+
+
+def _guide_panel() -> str:
+    from services.api.guide import guide_panel
+
+    return guide_panel()
 
 
 def wrap_shell(body: str, *, title: str, locale: str = "en", direction: str = "ltr", css: str = "") -> str:
@@ -151,13 +175,15 @@ def wrap_shell(body: str, *, title: str, locale: str = "en", direction: str = "l
         '<input id="nav-toggle" class="nav-toggle" type="checkbox"/>'
         '<label class="nav-scrim" for="nav-toggle"><span class="sr-only">Close navigation</span></label>'
         '<input id="chat-toggle" class="chat-toggle" type="checkbox"/>'
-        '<div class="app">'
+        + _guide_toggle()
+        + '<div class="app">'
         + sidebar()
         + '<div class="app-frame">'
         + topbar()
         + f'<main class="canvas">{body}</main>'
         + "</div></div>"
         + _chat_panel()
+        + _guide_panel()
         + '<div id="aegis-toast" class="toast" role="status" aria-live="polite" hidden></div>'
         + '<script>var n=document.getElementById("identity-next");'
         "if(n)n.value=location.pathname+location.search;</script>"

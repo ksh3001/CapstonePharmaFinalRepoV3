@@ -51,8 +51,9 @@ def jinja_available() -> bool:
 
 def render_jinja(name: str, context: dict[str, Any]) -> str:
     from jinja2 import Environment, FileSystemLoader, select_autoescape
-    from services.api.chrome import sidebar, user_cluster_html
+    from services.api.chrome import sidebar, topbar, user_cluster_html
     from services.api.console import render_ask_panel
+    from services.api.guide import guide_panel, guide_toggle
 
     env = Environment(
         loader=FileSystemLoader(str(TEMPLATES)),
@@ -61,7 +62,10 @@ def render_jinja(name: str, context: dict[str, Any]) -> str:
     merged = dict(context)
     merged.setdefault("user_cluster_html", user_cluster_html())
     merged.setdefault("sidebar_html", sidebar())
+    merged.setdefault("topbar_html", topbar())
     merged.setdefault("chat_html", render_ask_panel())
+    merged.setdefault("guide_toggle_html", guide_toggle())
+    merged.setdefault("guide_html", guide_panel())
     return env.get_template(name).render(**merged)
 
 
