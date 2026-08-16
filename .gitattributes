@@ -1,0 +1,2 @@
+# Shell scripts must stay LF so Azure App Service Linux bash can run them.
+*.sh text eol=lf

@@ -42,7 +42,8 @@ resource web 'Microsoft.Web/sites@2023-12-01' = {
     clientAffinityEnabled: false
     siteConfig: {
       linuxFxVersion: linuxFxVersion
-      appCommandLine: 'bash deploy/containers/startup.sh'
+      // Prefer uvicorn directly so CRLF in a checked-in .sh cannot break cold start.
+      appCommandLine: 'python -m uvicorn app:app --host 0.0.0.0 --port 8000'
       alwaysOn: !isFree
       ftpsState: 'Disabled'
       http20Enabled: true
