@@ -15,7 +15,7 @@ class ConsoleServerTests(unittest.TestCase):
         reset_server_state()
 
     def test_user_guide_opens_from_header(self) -> None:
-        home = dispatch("GET", "/")
+        home = dispatch("GET", "/home")
         self.assertIn('id="guide-toggle"', home["body"])
         self.assertIn('id="user-guide"', home["body"])
         self.assertIn("User guide", home["body"])
